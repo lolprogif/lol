@@ -2655,9 +2655,8 @@ class App:
   except Exception: pass
 
  def _update_offer(self,tag,pkg_url,sha_url):
-  if not messagebox.askyesno("Atualização disponível",f"Nova versão {tag} encontrada.\n\nBaixar e instalar agora? Os arquivos do programa serão respaldados e os dados locais preservados."):
-   self.status.config(text=f"Status: atualização {tag} disponível; instalação adiada."); return
-  self.status.config(text=f"Status: baixando atualização {tag}...")
+  # Clicar em VERIFICAR / ATUALIZAR já autoriza a instalação automática.
+  self.status.config(text=f"Status: nova versão {tag}; baixando automaticamente...")
   threading.Thread(target=self._update_download_worker,args=(tag,pkg_url,sha_url),daemon=True).start()
 
  def _update_download_worker(self,tag,pkg_url,sha_url):
