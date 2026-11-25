@@ -27,6 +27,7 @@ Source: "dist\LOICatFarmPro\LOICatFarmPro.exe"; DestDir: "{app}"; Flags: ignorev
 Source: "PREPARAR_VLC_PORTATIL.bat"; DestDir: "{app}"; Flags: ignoreversion
 Source: "dist\update_helper.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "dist\spotify_webview_host.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "MicrosoftEdgeWebView2Setup.exe"; DestDir: "{app}"; Flags: ignoreversion
 
 [Icons]
 Name: "{autoprograms}\LOI CATFARM PRO"; Filename: "{app}\{#AppExe}"; WorkingDir: "{app}"
@@ -37,7 +38,18 @@ Name: "{autoprograms}\Preparar VLC portátil"; Filename: "{cmd}"; Parameters: "/
 Name: "desktopicon"; Description: "Criar atalho na área de trabalho"; GroupDescription: "Atalhos:"
 
 [Run]
+Filename: "{app}\MicrosoftEdgeWebView2Setup.exe"; Parameters: "/silent /install"; StatusMsg: "Instalando componente WebView2 para o Spotify..."; Flags: waituntilterminated runhidden; Check: not IsWebView2Installed
 Filename: "{app}\{#AppExe}"; Description: "Abrir LOI CATFARM PRO"; Flags: postinstall nowait skipifsilent
+
+[Code]
+function IsWebView2Installed(): Boolean;
+var
+  Version: string;
+begin
+  Result := RegQueryStringValue(HKLM64, 'SOFTWARE\WOW6432Node\Microsoft\EdgeUpdate\Clients\{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}', 'pv', Version) and (Version <> '') and (Version <> '0.0.0.0');
+  if not Result then
+    Result := RegQueryStringValue(HKCU64, 'Software\Microsoft\EdgeUpdate\Clients\{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}', 'pv', Version) and (Version <> '') and (Version <> '0.0.0.0');
+end;
 
 [UninstallDelete]
 Type: filesandordirs; Name: "{app}\_internal\VLC_Portable"
