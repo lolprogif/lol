@@ -12,20 +12,28 @@ from pathlib import Path
 APP_EXE = "LOICatFarmPro.exe"
 
 
-def wait_for_pid(pid: int):
+def wait_for_pid(pid: int, timeout_ms: int = 120000):
     if os.name != "nt" or pid <= 0:
-        return
+        return True
     kernel = ctypes.WinDLL("kernel32", use_last_error=True)
     kernel.OpenProcess.argtypes = [ctypes.c_uint, ctypes.c_int, ctypes.c_uint]
     kernel.OpenProcess.restype = ctypes.c_void_p
     kernel.WaitForSingleObject.argtypes = [ctypes.c_void_p, ctypes.c_uint]
+    kernel.WaitForSingleObject.restype = ctypes.c_uint
     kernel.CloseHandle.argtypes = [ctypes.c_void_p]
     handle = kernel.OpenProcess(0x00100000, False, pid)  # SYNCHRONIZE
-    if handle:
-        try:
-            kernel.WaitForSingleObject(handle, 120000)
-        finally:
-            kernel.CloseHandle(handle)
+    if not handle:
+        # If the old process has already exited, no wait is needed.
+        return True
+    try:
+        result = kernel.WaitForSingleObject(handle, timeout_ms)
+        if result == 0:  # WAIT_OBJECT_0
+            return True
+        if result == 0x102:  # WAIT_TIMEOUT
+            return False
+        raise ctypes.WinError(ctypes.get_last_error())
+    finally:
+        kernel.CloseHandle(handle)
 
 
 def sha256_file(path: Path) -> str:
@@ -37,15 +45,15 @@ def sha256_file(path: Path) -> str:
 
 
 def safe_member(name: str) -> bool:
-    p = Path(name)
-    if p.is_absolute() or ".." in p.parts or name.startswith(("/", "\\")):
+    normalized = name.replace("\\", "/")
+    parts = normalized.split("/")
+    if not normalized or normalized.startswith("/") or any(part in ("", ".", "..") for part in parts):
         return False
-    normalized = str(p).replace("\\", "/")
     return normalized == APP_EXE or normalized.startswith("_internal/") or normalized == "_internal"
 
 
 def main():
-    if len(sys.argv) < 4:
+    if len(sys.argv) < 5:
         raise SystemExit("Uso: update_helper.exe <install_dir> <zip> <pid> <sha256>")
     install = Path(sys.argv[1]).resolve()
     archive = Path(sys.argv[2]).resolve()
@@ -55,7 +63,8 @@ def main():
         raise RuntimeError("Pasta de instalação ou pacote de atualização não encontrado.")
     if len(expected) != 64 or sha256_file(archive) != expected:
         raise RuntimeError("Hash SHA-256 do pacote não confere. Atualização cancelada.")
-    wait_for_pid(pid)
+    if not wait_for_pid(pid):
+        raise RuntimeError("O LOI antigo não fechou no tempo esperado. Atualização cancelada para evitar substituir arquivos em uso.")
     local = Path(os.environ.get("LOCALAPPDATA", str(Path.home()))) / "LOI_CATFARM_PRO" / "update_work"
     local.mkdir(parents=True, exist_ok=True)
     stage = Path(tempfile.mkdtemp(prefix="stage_", dir=str(local)))
@@ -66,6 +75,15 @@ def main():
             members = z.infolist()
             if not members or any(not safe_member(m.filename) for m in members):
                 raise RuntimeError("Pacote contém caminhos inválidos ou arquivos fora do aplicativo.")
+            # Reject symbolic links and duplicate archive paths.
+            seen = set()
+            for member in members:
+                normalized = member.filename.replace("\\", "/")
+                if normalized in seen:
+                    raise RuntimeError("Pacote contém caminhos duplicados.")
+                seen.add(normalized)
+                if (member.external_attr >> 16) & 0o170000 == 0o120000:
+                    raise RuntimeError("Pacote contém link simbólico; atualização bloqueada.")
             z.extractall(stage)
         if not (stage / APP_EXE).is_file() or not (stage / "_internal").is_dir():
             raise RuntimeError("Pacote de atualização incompleto: executável ou _internal ausente.")
@@ -83,11 +101,12 @@ def main():
                 shutil.copytree(target, backup / item) if target.is_dir() else shutil.copy2(target, backup / item)
         for item in ("_internal", APP_EXE):
             source, target = stage / item, install / item
+            # Register before replacing so a partially failed copy is also rolled back.
+            changed.append(item)
             if target.exists():
                 if target.is_dir(): shutil.rmtree(target)
                 else: target.unlink()
             shutil.copytree(source, target) if source.is_dir() else shutil.copy2(source, target)
-            changed.append(item)
         os.startfile(str(install / APP_EXE))
     except Exception:
         for item in reversed(changed):
