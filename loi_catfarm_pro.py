@@ -2644,7 +2644,7 @@ class App:
    pkg=assets.get(self.UPDATE_PACKAGE_ASSET); sha=assets.get(self.UPDATE_HASH_ASSET)
    if not tag or not pkg or not sha: raise RuntimeError("Release sem os assets obrigatórios LOI_UPDATE.zip e LOI_UPDATE.sha256.")
    match_latest=re.fullmatch(r"(?:v)?fix(\d+)",tag.lower())
-   match_current=re.fullmatch(r"(?:v)?fix(\\d+)",self.UPDATE_CURRENT.lower())
+   match_current=re.fullmatch(r"(?:v)?fix(\d+),self.UPDATE_CURRENT.lower())
    if not match_latest or not match_current: raise RuntimeError("Tag de versão inválida. Use FIX seguido de número, por exemplo FIX14.")
    if int(match_latest.group(1))<=int(match_current.group(1)): self.root.after(0,lambda t=tag:self._update_result(f"Você já está na versão {self.UPDATE_CURRENT} (Release {t}).")); return
    self.root.after(0,lambda t=tag,u=pkg,h=sha:self._update_offer(t,u,h))
