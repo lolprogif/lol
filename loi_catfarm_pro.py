@@ -12,7 +12,7 @@ except Exception:
 
 import tkinter as tk
 from tkinter import ttk, filedialog, messagebox, colorchooser
-import threading, time, json, random, os, sys, subprocess, shutil, webbrowser, urllib.request, hashlib, tempfile
+import threading, time, json, random, os, sys, subprocess, shutil, webbrowser, urllib.request, hashlib, tempfile, re
 from pathlib import Path
 try:
     import cv2
