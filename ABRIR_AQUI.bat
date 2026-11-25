@@ -4,9 +4,9 @@ cd /d "%~dp0"
 
 call "%~dp0PREPARAR_VLC_PORTATIL.bat"
 if errorlevel 1 (
-  echo O VLC nao foi preparado. A aba TV nao vai funcionar sem ele.
-  pause
-  exit /b 1
+  echo AVISO: VLC nao preparado neste momento. O LOI vai abrir mesmo assim.
+  echo A aba TV tentara preparar o VLC automaticamente quando voce clicar em PLAY.
+  echo.
 )
 
 
