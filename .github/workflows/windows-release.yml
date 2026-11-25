@@ -21,13 +21,13 @@ jobs:
       - name: Validate version and set app version
         shell: pwsh
         run: |
-          $tag = "\${{ inputs.release_tag }}"
+          $tag = "${{ inputs.release_tag }}"
           if ($tag -notmatch '^FIX[0-9]+$') { throw "Invalid release tag: $tag" }
           $source = Get-Content loi_catfarm_pro.py -Raw
-          $source = $source -replace 'UPDATE_CURRENT = ""FIX[0-9]+""', ('UPDATE_CURRENT = ""' + $tag + '""')
+          $source = $source -replace 'UPDATE_CURRENT = "FIX[0-9]+"', ('UPDATE_CURRENT = "' + $tag + '"')
           Set-Content loi_catfarm_pro.py $source -Encoding UTF8
           $iss = Get-Content LOICatFarmPro.iss -Raw
-          $iss = $iss -replace '#define AppVersion ""FIX[0-9]+""', ('#define AppVersion ""' + $tag + '""')
+          $iss = $iss -replace '#define AppVersion "FIX[0-9]+"', ('#define AppVersion "' + $tag + '"')
           Set-Content LOICatFarmPro.iss $iss -Encoding UTF8
       - name: Install Python and build dependencies
         uses: actions/setup-python@v5
@@ -64,8 +64,8 @@ jobs:
       - name: Publish Release assets
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: \${{ inputs.release_tag }}
-          name: LOI CATFARM PRO \${{ inputs.release_tag }}
+          tag_name: ${{ inputs.release_tag }}
+          name: LOI CATFARM PRO ${{ inputs.release_tag }}
           target_commitish: main
           generate_release_notes: true
           files: |
