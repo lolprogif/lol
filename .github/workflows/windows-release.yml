@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       release_tag:
-        description: "Release version (FIX13, FIX14...)"
+        description: "Release version (FIX14, FIX15, FIX16...)"
         required: true
-        default: "FIX15"
+        default: "FIX16"
         type: string
 
 permissions:
