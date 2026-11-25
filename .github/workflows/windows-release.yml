@@ -37,6 +37,10 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           python -m pip install pyinstaller keyboard pynput pydirectinput pygetwindow pillow opencv-python-headless numpy python-vlc pywebview
+      - name: Run updater helper safety tests
+        shell: pwsh
+        run: python -m unittest test_update_helper.py
+
       - name: Compile LOI and updater helper
         shell: pwsh
         run: |
