@@ -6,7 +6,7 @@ on:
       release_tag:
         description: "Release version (FIX13, FIX14...)"
         required: true
-        default: "FIX13"
+        default: "FIX14"
         type: string
 
 permissions:
@@ -53,6 +53,10 @@ jobs:
           if (!(Test-Path "dist/update_helper.exe")) { throw "Updater helper missing" }
           python -m PyInstaller --noconfirm --clean --onefile --windowed --name spotify_webview_host --collect-all webview --exclude-module pythonnet --exclude-module clr_loader --exclude-module clr spotify_webview_host.py
           if (!(Test-Path "dist/spotify_webview_host.exe")) { throw "Spotify WebView helper missing" }
+          $app = Start-Process -FilePath "dist/LOICatFarmPro/LOICatFarmPro.exe" -PassThru
+          Start-Sleep -Seconds 6
+          if ($app.HasExited) { throw "LOI startup smoke test failed (process exited before 6 seconds)" }
+          Stop-Process -Id $app.Id -Force -ErrorAction SilentlyContinue
       - name: Install Inno Setup
         shell: pwsh
         run: choco install innosetup --yes --no-progress
