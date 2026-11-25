@@ -51,7 +51,7 @@ jobs:
           python -m PyInstaller --noconfirm --clean --onefile --windowed --name update_helper update_helper.py
           if (!(Test-Path "dist/LOICatFarmPro/LOICatFarmPro.exe")) { throw "LOI executable missing" }
           if (!(Test-Path "dist/update_helper.exe")) { throw "Updater helper missing" }
-          python -m PyInstaller --noconfirm --clean --onefile --windowed --name spotify_webview_host --collect-all webview --exclude-module pythonnet --exclude-module clr_loader --exclude-module clr spotify_webview_host.py
+          python -m PyInstaller --noconfirm --clean --onefile --windowed --name spotify_webview_host --collect-all webview --collect-all pythonnet --hidden-import clr --hidden-import clr_loader spotify_webview_host.py
           if (!(Test-Path "dist/spotify_webview_host.exe")) { throw "Spotify WebView helper missing" }
           # Validate helper's missing-argument path exits with expected code.
           $hostTest = Start-Process -FilePath "dist/spotify_webview_host.exe" -PassThru -Wait
