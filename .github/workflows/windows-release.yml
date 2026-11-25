@@ -6,7 +6,7 @@ on:
       release_tag:
         description: "Release version (FIX13, FIX14...)"
         required: true
-        default: "FIX14"
+        default: "FIX15"
         type: string
 
 permissions:
@@ -57,6 +57,11 @@ jobs:
           Start-Sleep -Seconds 6
           if ($app.HasExited) { throw "LOI startup smoke test failed (process exited before 6 seconds)" }
           Stop-Process -Id $app.Id -Force -ErrorAction SilentlyContinue
+      - name: Download WebView2 Runtime Bootstrapper
+        shell: pwsh
+        run: |
+          Invoke-WebRequest -Uri "https://go.microsoft.com/fwlink/p/?LinkId=2124703" -OutFile "MicrosoftEdgeWebView2Setup.exe"
+          if (!(Test-Path "MicrosoftEdgeWebView2Setup.exe")) { throw "WebView2 bootstrapper missing" }
       - name: Install Inno Setup
         shell: pwsh
         run: choco install innosetup --yes --no-progress
