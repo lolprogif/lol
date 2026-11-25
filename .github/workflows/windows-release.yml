@@ -47,10 +47,12 @@ jobs:
       - name: Compile LOI and updater helper
         shell: pwsh
         run: |
-          python -m PyInstaller --noconfirm --clean --onedir --windowed --name LOICatFarmPro --add-data "spotify_webview_host.py;." --add-data "inventory_header_template.png;." --collect-all cv2 --collect-all numpy --collect-all PIL --collect-all keyboard --collect-all pynput --collect-all pydirectinput --collect-all pygetwindow --collect-all vlc --collect-all webview loi_catfarm_pro.py
+          python -m PyInstaller --noconfirm --clean --onedir --windowed --name LOICatFarmPro --add-data "spotify_webview_host.py;." --add-data "inventory_header_template.png;." --collect-all cv2 --collect-all numpy --collect-all PIL --collect-all keyboard --collect-all pynput --collect-all pydirectinput --collect-all pygetwindow --collect-all vlc --exclude-module webview --exclude-module pythonnet --exclude-module clr_loader --exclude-module clr loi_catfarm_pro.py
           python -m PyInstaller --noconfirm --clean --onefile --windowed --name update_helper update_helper.py
           if (!(Test-Path "dist/LOICatFarmPro/LOICatFarmPro.exe")) { throw "LOI executable missing" }
           if (!(Test-Path "dist/update_helper.exe")) { throw "Updater helper missing" }
+          python -m PyInstaller --noconfirm --clean --onefile --windowed --name spotify_webview_host --collect-all webview --exclude-module pythonnet --exclude-module clr_loader --exclude-module clr spotify_webview_host.py
+          if (!(Test-Path "dist/spotify_webview_host.exe")) { throw "Spotify WebView helper missing" }
       - name: Install Inno Setup
         shell: pwsh
         run: choco install innosetup --yes --no-progress
@@ -64,7 +66,7 @@ jobs:
       - name: Prepare updater ZIP and SHA-256
         shell: pwsh
         run: |
-          Compress-Archive -Path "dist/LOICatFarmPro/LOICatFarmPro.exe","dist/LOICatFarmPro/_internal" -DestinationPath LOI_UPDATE.zip -Force
+          Compress-Archive -Path "dist/LOICatFarmPro/LOICatFarmPro.exe","dist/LOICatFarmPro/_internal","dist/spotify_webview_host.exe" -DestinationPath LOI_UPDATE.zip -Force
           $hash = (Get-FileHash LOI_UPDATE.zip -Algorithm SHA256).Hash.ToLower()
           Set-Content LOI_UPDATE.sha256 $hash -NoNewline
           if (!(Test-Path LOI_UPDATE.zip) -or !(Test-Path LOI_UPDATE.sha256)) { throw "Update assets missing" }
