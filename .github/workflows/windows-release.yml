@@ -37,6 +37,9 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           python -m pip install pyinstaller keyboard pynput pydirectinput pygetwindow pillow opencv-python-headless numpy python-vlc pywebview
+      - name: Syntax check Python files
+        shell: pwsh
+        run: python -m py_compile loi_catfarm_pro.py update_helper.py test_update_helper.py
       - name: Run updater helper safety tests
         shell: pwsh
         run: python -m unittest test_update_helper.py
