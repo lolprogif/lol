@@ -2624,7 +2624,7 @@ class App:
    s=int(time.time()-self.started);self.clock.config(text=f"Tempo: {s//3600:02}:{s//60%60:02}:{s%60:02}")
   self.root.after(500,self.tick)
  UPDATE_REPO = "lolprogif/lol"
- UPDATE_CURRENT = "FIX12"
+ UPDATE_CURRENT = "FIX13"
  UPDATE_PACKAGE_ASSET = "LOI_UPDATE.zip"
  UPDATE_HASH_ASSET = "LOI_UPDATE.sha256"
 
@@ -2643,7 +2643,7 @@ class App:
    assets={a.get("name"):a.get("browser_download_url") for a in release.get("assets",[])}
    pkg=assets.get(self.UPDATE_PACKAGE_ASSET); sha=assets.get(self.UPDATE_HASH_ASSET)
    if not tag or not pkg or not sha: raise RuntimeError("Release sem os assets obrigatórios LOI_UPDATE.zip e LOI_UPDATE.sha256.")
-   if tag.lower().lstrip("v")==self.UPDATE_CURRENT.lower().lstrip("v"): self.root.after(0,lambda t=tag:self._update_result(f"Você já está na versão {t}.")); return
+   match_latest=re.fullmatch(r"(?:v)?fix(\\d+)",tag.lower())\n   match_current=re.fullmatch(r"(?:v)?fix(\\d+)",self.UPDATE_CURRENT.lower())\n   if not match_latest or not match_current: raise RuntimeError("Tag de versão inválida. Use FIX seguido de número, por exemplo FIX14.")\n   if int(match_latest.group(1))<=int(match_current.group(1)): self.root.after(0,lambda t=tag:self._update_result(f"Você já está na versão {self.UPDATE_CURRENT} (Release {t}).")); return
    self.root.after(0,lambda t=tag,u=pkg,h=sha:self._update_offer(t,u,h))
   except Exception as exc:
    self.root.after(0,lambda e=str(exc):self._update_result("Não foi possível verificar: "+e))
