@@ -45,12 +45,17 @@ def sha256_file(path: Path) -> str:
 
 
 def safe_member(name: str) -> bool:
-    normalized = name.replace("\\", "/")
+    # ZIP directory entries conventionally end with '/'; allow that only for
+    # the _internal tree, while still rejecting traversal and absolute paths.
+    normalized = name.replace("\\\\", "/")
+    is_dir = normalized.endswith("/")
+    normalized = normalized.rstrip("/")
     parts = normalized.split("/")
     if not normalized or normalized.startswith("/") or any(part in ("", ".", "..") for part in parts):
         return False
-    return normalized == APP_EXE or normalized.startswith("_internal/") or normalized == "_internal"
-
+    if is_dir:
+        return normalized == "_internal" or normalized.startswith("_internal/")
+    return normalized == APP_EXE or normalized.startswith("_internal/")
 
 def main():
     if len(sys.argv) < 5:
