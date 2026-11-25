@@ -38,11 +38,6 @@ py -m PyInstaller --noconfirm --clean --onedir --windowed ^
 if errorlevel 1 goto :error
 
 echo.
-echo [3b/4] Gerando auxiliar seguro de atualizacao...
-py -m PyInstaller --noconfirm --clean --onefile --windowed --name update_helper update_helper.py
-if errorlevel 1 goto :error
-
-echo.
 echo [4/4] Verificando e preparando Inno Setup 6...
 powershell -NoProfile -ExecutionPolicy Bypass -File "INSTALAR_INNO_SETUP6.ps1"
 if errorlevel 1 (

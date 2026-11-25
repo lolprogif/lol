@@ -1,5 +1,5 @@
 LOI CATFARM PRO — PACOTE PARA GERAR O INSTALADOR WINDOWS
-Versão-base: FIX12 — preparação com aba Módulos + Jogo e sistema de atualização inicial.
+Versão-base: FIX12 (não altera o código principal do macro).
 
 IMPORTANTE
 Este pacote prepara a compilação e o Setup.exe no seu Windows. O Setup.exe ainda
@@ -17,7 +17,7 @@ COMO GERAR
 2. Instale Python 3.11/3.12 64 bits. O Inno Setup 6 sera verificado/instalado automaticamente pelo gerador.
 3. Feche o macro e execute GERAR_INSTALADOR.bat. Se o Windows solicitar autorizacao (UAC) para instalar Inno Setup, confirme.
 4. Aguarde a instalação das bibliotecas e a compilação.
-5. Ao terminar, procure Output\LOI_CATFARM_PRO_Setup.exe. O pacote também compila update_helper.exe, usado pelo atualizador.
+5. Ao terminar, procure Output\LOI_CATFARM_PRO_Setup.exe.
 6. Execute o Setup.exe para instalar. Depois, no menu Iniciar, abra “Preparar VLC portátil” uma vez para baixar e validar o VLC (aprox. 83 MB). O programa ficará no perfil do usuário
    (AppData\Local\Programs), sem exigir instalação em Program Files.
 
@@ -35,5 +35,3 @@ OBSERVAÇÕES IMPORTANTES
   a sua cópia original.
 
 Se a compilação apresentar erro, envie uma foto da janela ou o texto completo.
-
-Consulte ATUALIZADOR_LEIA-ME.txt para as condições de uso do botão VERIFICAR / ATUALIZAR e publicação de Releases.

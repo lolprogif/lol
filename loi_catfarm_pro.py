@@ -12,7 +12,7 @@ except Exception:
 
 import tkinter as tk
 from tkinter import ttk, filedialog, messagebox, colorchooser
-import threading, time, json, random, os, sys, subprocess, shutil, webbrowser, urllib.request, hashlib, tempfile, re
+import threading, time, json, random, os, sys, subprocess, shutil, webbrowser, urllib.request, hashlib, tempfile
 from pathlib import Path
 try:
     import cv2
@@ -36,6 +36,7 @@ except Exception:
     gw = None
     pynput_keyboard = None
 
+UPDATE_CURRENT_VERSION="0.0.0"  # Baseline do módulo de atualização; sincronizar no próximo release
 BG="#202326"; PANEL="#292e33"; FIELD="#343a40"; BLUE="#167ba7"; PRIMARY=BLUE; CYAN="#35b9e8"
 THEMES={
  "Dark Neon":{"bg":"#171b22","panel":"#222a35","field":"#303b49","primary":"#168bd2","accent":"#35c9f4","text":"#f2f6fa","muted":"#b8c5d1","header":"#10151c","button":"#168bd2"},
@@ -144,7 +145,7 @@ class App:
   self.count=self.label(stats,"Passos Gravados: 0"); self.count.pack(side="right",padx=14)
   self.nb=ttk.Notebook(self.root); self.nb.pack(fill="both",expand=True,padx=12,pady=4)
   self.pages={}; self.page_canvases={}
-  for name in ("Módulos + Jogo","Cliques","Skills","Anti-Ban","Perfis","MGP Multicliente","Poções","Cores","Clientes & Automação","Ciclo 4 Etapas","TV","Spotify"):
+  for name in ("Módulos","Jogo","Cliques","Skills","Anti-Ban","Perfis","MGP Multicliente","Poções","Cores","Clientes & Automação","Ciclo 4 Etapas","TV","Spotify","Atualizações"):
    outer=tk.Frame(self.nb,bg=PANEL)
    self.nb.add(outer,text=name)
    canvas=tk.Canvas(outer,bg=PANEL,highlightthickness=0,borderwidth=0)
@@ -162,10 +163,7 @@ class App:
    content.bind("<Leave>",lambda e:self._disable_wheel())
    self.pages[name]=content
    self.page_canvases[name]=canvas
-  # Alias keeps the existing page builders intact while combining their sections.
-  self.pages["Módulos"] = self.pages["Módulos + Jogo"]
-  self.pages["Jogo"] = self.pages["Módulos + Jogo"]
-  self.make_modules(); self.make_game(); self.make_clicks(); self.make_skills(); self.make_antiban(); self.make_profiles(); self.make_multiclient(); self.make_potions(); self.make_appearance(); self.make_client_automation(); self.make_cycle4(); self.make_tv(); self.make_spotify()
+  self.make_modules(); self.make_game(); self.make_clicks(); self.make_skills(); self.make_antiban(); self.make_profiles(); self.make_multiclient(); self.make_potions(); self.make_appearance(); self.make_client_automation(); self.make_cycle4(); self.make_tv(); self.make_spotify(); self.make_updates()
   foot=tk.Frame(self.root,bg="#15191d"); foot.pack(fill="x",padx=12,pady=8)
   self.status=self.label(foot,"Status: Pausado",fg="#e5b45b",bg="#15191d",anchor="w"); self.status.pack(fill="x",padx=9,pady=6)
   bar=tk.Frame(foot,bg="#15191d"); bar.pack(fill="x",padx=6,pady=(0,7))
@@ -173,7 +171,66 @@ class App:
   self.button(bar,"Ⅱ PAUSAR (F9)",self.stop,"#247da8")
   self.button(bar,"■ LIMPAR ROTA",self.clear_route,"#d58232")
   tk.Button(bar,text="Salvar Configs",command=self.save,bg="#287ba8",fg="white",relief="flat").pack(side="right",padx=4)
-  tk.Button(bar,text="↻ VERIFICAR / ATUALIZAR",command=self.check_updates,bg="#7b5bd6",fg="white",relief="flat").pack(side="right",padx=4)
+
+ def make_updates(self):
+  p=self.pages["Atualizações"]
+  self.section(p,"ATUALIZAÇÃO AUTOMÁTICA DO LOI")
+  self.label(p,"Verifique e instale novas versões diretamente pelo programa, sem extrair ZIP manualmente.",fg="#d7e6ef").pack(anchor="w",padx=14,pady=4)
+  self.update_version_label=self.label(p,"Versão instalada: "+UPDATE_CURRENT_VERSION,fg=CYAN)
+  self.update_version_label.pack(anchor="w",padx=14,pady=(8,3))
+  self.update_status_label=self.label(p,"Status: servidor de atualização ainda não configurado",fg="#e5b45d")
+  self.update_status_label.pack(anchor="w",padx=14,pady=3)
+  row=tk.Frame(p,bg=PANEL); row.pack(fill="x",padx=10,pady=10)
+  self.button(row,"⟳ VERIFICAR / ATUALIZAR",self.update_check_and_install,BLUE)
+  self.label(p,"O atualizador preserva os arquivos de configuração e valida o pacote com SHA-256 antes de instalar.",fg="#c5d1d9").pack(anchor="w",padx=14,pady=4)
+  self.label(p,"Para ativar as atualizações online, o responsável pelo projeto precisa publicar um manifesto e um ZIP em um servidor e preencher update_config.json.",fg="#e5b45d",wraplength=620,justify="left").pack(anchor="w",padx=14,pady=8)
+
+ def update_config_path(self):
+  if getattr(sys,"frozen",False): return Path(sys.executable).resolve().parent / "update_config.json"
+  return Path(__file__).resolve().parent / "update_config.json"
+
+ def update_set_status(self,text,color="#e5b45d"):
+  try: self.root.after(0,lambda:self.update_status_label.config(text=text,fg=color))
+  except Exception: pass
+
+ def update_check_and_install(self):
+  cfg_path=self.update_config_path()
+  try: cfg=json.loads(cfg_path.read_text(encoding="utf-8"))
+  except Exception: cfg={"manifest_url":""}
+  manifest_url=(cfg.get("manifest_url") or "").strip()
+  if not manifest_url or "COLE_A_URL" in manifest_url:
+   messagebox.showinfo("Atualizações","O botão já está integrado. Falta configurar o endereço do servidor de versões (manifest_url) para habilitar downloads automáticos.")
+   return
+  self.update_status_label.config(text="Status: verificando versão...",fg=CYAN)
+  threading.Thread(target=self.update_worker,args=(manifest_url,),daemon=True).start()
+
+ def update_worker(self,manifest_url):
+  try:
+   req=urllib.request.Request(manifest_url,headers={"User-Agent":"LOI-CATFARM-PRO-Updater/1"})
+   with urllib.request.urlopen(req,timeout=20) as response: manifest=json.loads(response.read().decode("utf-8"))
+   latest=str(manifest.get("version","")).strip(); package_url=str(manifest.get("package_url","")).strip(); digest=str(manifest.get("sha256","")).lower().strip(); notes=str(manifest.get("notes",""))
+   if not latest or not package_url or len(digest)!=64: raise ValueError("Manifesto inválido: informe version, package_url e sha256 (64 caracteres).")
+   installed=UPDATE_CURRENT_VERSION
+   if installed==latest:
+    self.update_set_status("Status: já está atualizado — "+latest,"#39c879"); return
+   self.update_set_status("Status: versão "+latest+" encontrada. Baixando...",CYAN)
+   with urllib.request.urlopen(package_url,timeout=60) as response: data=response.read()
+   actual=hashlib.sha256(data).hexdigest()
+   if actual!=digest: raise ValueError("Falha de integridade SHA-256. O pacote foi rejeitado.")
+   temp_dir=Path(tempfile.gettempdir())/"LOI_CATFARM_PRO_update"
+   temp_dir.mkdir(parents=True,exist_ok=True)
+   zip_path=temp_dir/"update_package.zip"; zip_path.write_bytes(data)
+   app_dir=Path(sys.executable).resolve().parent if getattr(sys,"frozen",False) else Path(__file__).resolve().parent
+   ps1=app_dir/"LOI_UPDATER.ps1"
+   if not ps1.exists(): raise FileNotFoundError("LOI_UPDATER.ps1 não foi instalado junto com o aplicativo.")
+   self.root.after(0,lambda: messagebox.showinfo("Atualização pronta", "Versão "+latest+" baixada e validada.\n\n"+(notes or "Atualização disponível")+"\n\nO programa será fechado, atualizado e reaberto."))
+   subprocess.Popen(["powershell.exe","-NoProfile","-ExecutionPolicy","Bypass","-File",str(ps1),"-InstallDir",str(app_dir),"-ZipPath",str(zip_path),"-ExeName",Path(sys.executable).name],creationflags=getattr(subprocess,"CREATE_NO_WINDOW",0))
+   self.root.after(500,self.close)
+  except Exception as e:
+   self.update_set_status("Status: não foi possível atualizar — "+str(e),"#ef6a75")
+   try:
+    err=str(e); self.root.after(0,lambda:messagebox.showerror("Atualização",err))
+   except Exception: pass
 
  def make_cycle4(self):
   p=self.pages["Ciclo 4 Etapas"]
@@ -416,7 +473,7 @@ class App:
   p=self.pages["Spotify"]
   self.spotify_hwnd=None; self.spotify_process=None
   self.spotify_profile_dir=Path(os.environ.get("LOCALAPPDATA",str(Path.home()))) / "LOI_CATFARM_PRO" / "SpotifyWebView2Profile"
-  self.spotify_helper=Path(sys.executable).parent / "spotify_webview_host.exe"
+  self.spotify_helper=Path(__file__).with_name("spotify_webview_host.py")
   self.section(p,"SPOTIFY — REPRODUÇÃO DENTRO DO LOI CATFARM PRO")
   self.label(p,"Spotify incorporado ao painel usando Microsoft Edge WebView2. Entre na sua própria conta; as regras de reprodução do Spotify continuam valendo.",fg="#e5c45d",wraplength=760,justify="left").pack(anchor="w",padx=14,pady=6)
   bar=self.row(p)
@@ -440,11 +497,13 @@ class App:
   if self.spotify_process and self.spotify_process.poll() is None:
    self.spotify_resize_embedded(); self.spotify_status.config(text="Spotify WebView2 já está iniciado no painel."); return
   if not self.spotify_helper.is_file():
-   self.spotify_status.config(text="Executável spotify_webview_host.exe não encontrado na pasta do LOI."); return
+   self.spotify_status.config(text="Arquivo spotify_webview_host.py não encontrado na pasta do macro."); return
   try:
    self.spotify_profile_dir.mkdir(parents=True,exist_ok=True)
+   pythonw=Path(sys.executable).with_name("pythonw.exe")
+   executable=str(pythonw if pythonw.is_file() else Path(sys.executable))
    flags=getattr(subprocess,"CREATE_NO_WINDOW",0)
-   self.spotify_process=subprocess.Popen([str(self.spotify_helper),str(int(self.spotify_host.winfo_id())),str(self.spotify_profile_dir)],cwd=str(self.spotify_helper.parent),stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL,creationflags=flags)
+   self.spotify_process=subprocess.Popen([executable,str(self.spotify_helper),str(int(self.spotify_host.winfo_id())),str(self.spotify_profile_dir)],cwd=str(self.spotify_helper.parent),stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL,creationflags=flags)
    self.spotify_placeholder.place_forget()
    self.spotify_status.config(text="Iniciando Spotify incorporado com WebView2... aguarde alguns segundos.")
    self.root.after(1800,self.spotify_check_embedded)
@@ -566,51 +625,36 @@ class App:
  def tv_selected(self):
   sel=self.tv_list.curselection(); return self.tv_visible[sel[0]] if sel and sel[0]<len(self.tv_visible) else None
  def _tv_load_vlc(self):
-  """Localiza e, se necessário, prepara o VLC portátil automaticamente."""
-  import os, subprocess
+  """Carrega primeiro o VLC portátil distribuído junto ao LOI; usa o instalado como reserva."""
+  import os
   from pathlib import Path
   if getattr(self, "_tv_vlc_dir", None) and (self._tv_vlc_dir/"libvlc.dll").is_file():
    vlc_dir=self._tv_vlc_dir
   else:
-   # No PyInstaller, __file__ fica dentro de _internal; o VLC e o BAT ficam
-   # na pasta do executável. Procura nos dois locais.
-   roots=[]
-   for candidate in (Path(sys.executable).resolve().parent, Path(__file__).resolve().parent, Path(getattr(sys,"_MEIPASS",Path(__file__).resolve().parent))):
-    if candidate not in roots: roots.append(candidate)
-   candidates=[]
-   for root in roots:
-    candidates.extend([root/"VLC_Portable",root/"VLC_Portable"/"vlc-3.0.24",root/"VLC"])
-    for folder in (root/"VLC_Portable",root/"VLC"):
-     if folder.is_dir():
-      try: candidates.extend(p.parent for p in folder.rglob("libvlc.dll"))
-      except OSError: pass
-   for envname in ("ProgramFiles","ProgramFiles(x86)"):
+   root=Path(__file__).resolve().parent
+   candidates=[root/"VLC_Portable", root/"VLC_Portable"/"vlc-3.0.24", root/"VLC"]
+   # O ZIP oficial contém uma pasta-raiz versionada; procura libvlc.dll sem
+   # depender do nome exato dessa pasta.
+   for folder in (root/"VLC_Portable", root/"VLC"):
+    if folder.is_dir():
+     try: candidates.extend(p.parent for p in folder.rglob("libvlc.dll"))
+     except OSError: pass
+   for envname in ("ProgramFiles", "ProgramFiles(x86)"):
     base=os.environ.get(envname)
     if base: candidates.append(Path(base)/"VideoLAN"/"VLC")
-   candidates.extend([Path(r"C:\Program Files\VideoLAN\VLC"),Path(r"C:\Program Files (x86)\VideoLAN\VLC")])
-   vlc_dir=next((x for x in candidates if (x/"libvlc.dll").is_file()),None)
+   candidates.extend([Path(r"C:\Program Files\VideoLAN\VLC"), Path(r"C:\Program Files (x86)\VideoLAN\VLC")])
+   vlc_dir=next((x for x in candidates if (x/"libvlc.dll").is_file()), None)
    if vlc_dir is None:
-    # Aciona o preparo incluso no instalador e só volta a procurar após terminar.
-    bat=next((root/"PREPARAR_VLC_PORTATIL.bat" for root in roots if (root/"PREPARAR_VLC_PORTATIL.bat").is_file()),None)
-    if bat:
-     self.tv_status.config(text="Status: preparando VLC portátil automaticamente (download inicial)...")
-     try: subprocess.run(["cmd.exe","/c",str(bat)],cwd=str(bat.parent),check=True)
-     except Exception as exc: raise RuntimeError("Não foi possível preparar o VLC automaticamente. Confira a internet e tente novamente. "+str(exc)[:120])
-     for root in roots:
-      for folder in (root/"VLC_Portable",root/"VLC"):
-       if folder.is_dir():
-        try: candidates.extend(p.parent for p in folder.rglob("libvlc.dll"))
-        except OSError: pass
-     vlc_dir=next((x for x in candidates if (x/"libvlc.dll").is_file()),None)
-   if vlc_dir is None:
-    raise RuntimeError("VLC portátil não encontrado. O preparo automático falhou; execute ABRIR_AQUI.bat com internet.")
+    raise RuntimeError("O VLC portátil ainda não foi preparado. Feche o macro e execute ABRIR_AQUI.bat com internet para baixar a versão oficial automaticamente.")
    self._tv_vlc_dir=vlc_dir
-  if hasattr(os,"add_dll_directory"):
+  # Registra DLLs nativas antes de importar python-vlc.
+  if hasattr(os, "add_dll_directory"):
    try: self._tv_dll_handle=os.add_dll_directory(str(vlc_dir))
    except OSError: pass
   os.environ["PYTHON_VLC_LIB_PATH"]=str(vlc_dir/"libvlc.dll")
   os.environ["PYTHON_VLC_MODULE_PATH"]=str(vlc_dir/"plugins")
   os.environ["VLC_PLUGIN_PATH"]=str(vlc_dir/"plugins")
+  # Algumas dependencias nativas do VLC procuram DLLs na pasta principal.
   os.environ["PATH"]=str(vlc_dir)+os.pathsep+os.environ.get("PATH","")
   import vlc
   return vlc
@@ -2636,61 +2680,6 @@ class App:
   if self.running and self.started:
    s=int(time.time()-self.started);self.clock.config(text=f"Tempo: {s//3600:02}:{s//60%60:02}:{s%60:02}")
   self.root.after(500,self.tick)
- UPDATE_REPO = "lolprogif/lol"
- UPDATE_CURRENT = "FIX15"
- UPDATE_PACKAGE_ASSET = "LOI_UPDATE.zip"
- UPDATE_HASH_ASSET = "LOI_UPDATE.sha256"
-
- def check_updates(self):
-  if getattr(self, "update_busy", False): return
-  self.update_busy = True
-  self.status.config(text="Status: verificando atualizações no GitHub...")
-  threading.Thread(target=self._update_check_worker, daemon=True).start()
-
- def _update_check_worker(self):
-  try:
-   api=f"https://api.github.com/repos/{self.UPDATE_REPO}/releases/latest"
-   req=urllib.request.Request(api,headers={"Accept":"application/vnd.github+json","User-Agent":"LOI-CATFARM-PRO-Updater"})
-   with urllib.request.urlopen(req,timeout=20) as response: release=json.loads(response.read().decode("utf-8"))
-   tag=str(release.get("tag_name","")).strip()
-   assets={a.get("name"):a.get("browser_download_url") for a in release.get("assets",[])}
-   pkg=assets.get(self.UPDATE_PACKAGE_ASSET); sha=assets.get(self.UPDATE_HASH_ASSET)
-   if not tag or not pkg or not sha: raise RuntimeError("Release sem os assets obrigatórios LOI_UPDATE.zip e LOI_UPDATE.sha256.")
-   match_latest=re.fullmatch(r"(?:v)?fix(\d+)",tag.lower())
-   match_current=re.fullmatch(r"(?:v)?fix(\d+)",self.UPDATE_CURRENT.lower())
-   if not match_latest or not match_current: raise RuntimeError("Tag de versão inválida. Use FIX seguido de número, por exemplo FIX14.")
-   if int(match_latest.group(1))<=int(match_current.group(1)): self.root.after(0,lambda t=tag:self._update_result(f"Você já está na versão {self.UPDATE_CURRENT} (Release {t}).")); return
-   self.root.after(0,lambda t=tag,u=pkg,h=sha:self._update_offer(t,u,h))
-  except Exception as exc:
-   self.root.after(0,lambda e=str(exc):self._update_result("Não foi possível verificar: "+e))
-  finally:
-   self.root.after(0,lambda:setattr(self,"update_busy",False))
-
- def _update_result(self,message):
-  try: self.status.config(text="Status: "+message); messagebox.showinfo("LOI CATFARM PRO — Atualizações",message)
-  except Exception: pass
-
- def _update_offer(self,tag,pkg_url,sha_url):
-  # Clicar em VERIFICAR / ATUALIZAR já autoriza a instalação automática.
-  self.status.config(text=f"Status: nova versão {tag}; baixando automaticamente...")
-  threading.Thread(target=self._update_download_worker,args=(tag,pkg_url,sha_url),daemon=True).start()
-
- def _update_download_worker(self,tag,pkg_url,sha_url):
-  try:
-   tmp=Path(tempfile.gettempdir())/"LOI_CATFARM_PRO_update"; tmp.mkdir(parents=True,exist_ok=True)
-   archive=tmp/"LOI_UPDATE.zip"; hashfile=tmp/"LOI_UPDATE.sha256"
-   for url,dest in ((pkg_url,archive),(sha_url,hashfile)):
-    req=urllib.request.Request(url,headers={"User-Agent":"LOI-CATFARM-PRO-Updater"})
-    with urllib.request.urlopen(req,timeout=60) as r,dest.open("wb") as f: shutil.copyfileobj(r,f)
-   expected=hashfile.read_text(encoding="utf-8",errors="replace").strip().split()[0].lower()
-   if len(expected)!=64 or hashlib.sha256(archive.read_bytes()).hexdigest()!=expected: raise RuntimeError("Hash SHA-256 não confere. Nenhum arquivo foi alterado.")
-   install=Path(sys.executable).resolve().parent; helper=install/"update_helper.exe"
-   if not helper.is_file(): raise RuntimeError("Helper de atualização não instalado. Primeiro será necessário instalar a versão com o atualizador.")
-   subprocess.Popen([str(helper),str(install),str(archive),str(os.getpid()),expected],cwd=str(install),close_fds=True)
-   self.root.after(0,lambda t=tag:self.status.config(text=f"Status: instalando {t}; o LOI vai reiniciar."))
-   self.root.after(700,self.close)
-  except Exception as exc: self.root.after(0,lambda e=str(exc):self._update_result("Falha na atualização: "+e))
-
  def close(self):
   if getattr(self,"cycle4_running",False): self.stop_cycle4()
   try:

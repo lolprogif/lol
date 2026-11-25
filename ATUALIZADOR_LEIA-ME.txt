@@ -1,33 +1,21 @@
-LOI CATFARM PRO — MÓDULOS + JOGO E VERIFICAR/ATUALIZAR
-
-ALTERAÇÕES DESTA PREPARAÇÃO
-- As abas Módulos e Jogo foram reunidas em uma única aba: "Módulos + Jogo".
-  O conteúdo de ambas foi mantido e os builders originais continuam usando a mesma página.
-- Foi acrescentado o botão "VERIFICAR / ATUALIZAR" no rodapé.
-- A verificação consulta Releases do GitHub no repositório lolprogif/lol.
-- O atualizador exige uma Release com dois assets: LOI_UPDATE.zip e LOI_UPDATE.sha256.
-- O hash SHA-256 é verificado antes de iniciar qualquer substituição.
-- Um helper separado espera o programa encerrar, cria backup local e atualiza apenas
-  LOICatFarmPro.exe e _internal, mantendo arquivos JSON de configuração existentes.
-- Se a substituição falhar, o helper tenta restaurar os componentes anteriores.
+LOI CATFARM PRO — ATUALIZADOR AUTOMÁTICO (ESTRUTURA INICIAL)\n
+A aba “Atualizações” foi integrada ao código-fonte. Ela permite consultar um manifesto remoto e baixar um ZIP, conferir SHA-256, iniciar o helper PowerShell para aguardar o encerramento do aplicativo, fazer backup da pasta instalada, aplicar a atualização e reabrir o programa.
 
 
-PRIMEIRA INSTALAÇÃO / LIMITAÇÕES
-- O botão de atualização do LOI antigo NÃO foi retroativamente conectado.
-- É necessário gerar e instalar esta nova compilação uma vez.
-- O instalador Windows não foi compilado/testado nesta sessão (ambiente não Windows).
-- O repositório lolprogif/lol precisa ter uma Release publicada com os assets acima;
-  no momento da implementação não foi configurada/publicada uma Release.
-- O sistema de atualização é uma base implementada e ainda requer teste real no Windows.
+IMPORTANTE: O botão não realizará atualização online até que o servidor de versões seja configurado. Não existe servidor publicado nesta entrega e o endereço em update_config.json é apenas um marcador.
 
+CONFIGURAÇÃO DO SERVIDOR:
+1. Hospede manifest.json e o ZIP em HTTPS.
+2. O ZIP deve conter os arquivos do aplicativo na raiz, incluindo LOICatFarmPro.exe e a pasta _internal (não incluir uma pasta externa envolvendo tudo).
+3. Calcule o SHA-256 do ZIP e preencha manifest.json.
+4. O manifest deve conter: version, package_url, sha256 e opcional notes.
+5. Coloque a URL HTTPS do manifesto em update_config.json no campo manifest_url.
+6. Recompile o instalador com GERAR_INSTALADOR.bat. Inclua os arquivos update_config.json e LOI_UPDATER.ps1 no instalador.
 
-COMO PUBLICAR UMA RELEASE DE ATUALIZAÇÃO (para cada versão futura)
-1. Compile o LOI pelo GERAR_INSTALADOR.bat, de modo que dist\LOICatFarmPro contenha
-   LOICatFarmPro.exe e _internal.
-2. Crie LOI_UPDATE.zip contendo na raiz do ZIP somente LOICatFarmPro.exe e a pasta
-   _internal (com seus arquivos). Não inclua configurações locais nem update_helper.exe.
-3. Calcule SHA-256 do LOI_UPDATE.zip e salve o valor hexadecimal em LOI_UPDATE.sha256.
-4. Publique ambos os arquivos como assets de uma Release no GitHub lolprogif/lol.
-5. Use uma tag de versão diferente de FIX12, por exemplo FIX13.
+EXEMPLO DE MANIFESTO: manifest_exemplo.json
 
-TXT de hash deve conter apenas o hash (ou hash seguido do nome do ZIP).
+SEGURANÇA/OPERAÇÃO:
+- O download é validado pelo SHA-256 indicado no manifesto.
+- O updater cria backup local da pasta de instalação antes de copiar a nova versão.
+- Esta primeira implementação é uma estrutura inicial; rollback automatizado completo e assinatura digital do pacote ainda precisam de validação/testes em Windows antes de uso real.
+- Use apenas um servidor HTTPS confiável e controle de publicação do manifesto.
