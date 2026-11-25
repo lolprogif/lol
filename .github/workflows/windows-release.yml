@@ -86,6 +86,26 @@ jobs:
           python -c "import zipfile; z=zipfile.ZipFile('LOI_UPDATE.zip'); n=set(z.namelist()); assert 'LOICatFarmPro.exe' in n; assert 'spotify_webview_host.exe' in n; assert any(x.startswith('_internal/') for x in n); assert z.testzip() is None"
           $publishedHash = (Get-Content LOI_UPDATE.sha256 -Raw).Trim()
           if ($publishedHash -ne $hash) { throw "Update SHA-256 asset does not match package" }
+      - name: Prepare portable folder ZIP
+        shell: pwsh
+        run: |
+          $portable = "LOI_CATFARM_PRO_FIX16_Portable"
+          New-Item -ItemType Directory -Path $portable -Force | Out-Null
+          Copy-Item "dist/LOICatFarmPro/LOICatFarmPro.exe" $portable
+          Copy-Item "dist/LOICatFarmPro/_internal" $portable -Recurse -Force
+          Copy-Item "dist/update_helper.exe" $portable
+          Copy-Item "dist/spotify_webview_host.exe" $portable
+          Copy-Item "MicrosoftEdgeWebView2Setup.exe" $portable
+          Copy-Item "PREPARAR_VLC_PORTATIL.bat" $portable
+          @'
+          LOI CATFARM PRO FIX16 - ZIP PORTATIL
+          1. Extraia esta pasta ZIP para um local de sua escolha.
+          2. Execute LOICatFarmPro.exe.
+          3. Para Spotify, o WebView2 Runtime pode precisar ser instalado. Use MicrosoftEdgeWebView2Setup.exe se necessário.
+          4. Para VLC, execute PREPARAR_VLC_PORTATIL.bat se a função pedir preparação.
+          '@ | Set-Content "$portable/LEIA-ME.txt" -Encoding UTF8
+          Compress-Archive -Path "$portable/*" -DestinationPath "LOI_CATFARM_PRO_FIX16_Portable.zip" -Force
+          if (!(Test-Path "LOI_CATFARM_PRO_FIX16_Portable.zip")) { throw "Portable ZIP missing" }
       - name: Publish Release assets
         uses: softprops/action-gh-release@v2
         with:
@@ -97,4 +117,5 @@ jobs:
             Output/LOI_CATFARM_PRO_Setup.exe
             LOI_UPDATE.zip
             LOI_UPDATE.sha256
+            LOI_CATFARM_PRO_FIX16_Portable.zip
           fail_on_unmatched_files: true
