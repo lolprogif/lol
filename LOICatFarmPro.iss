@@ -1,6 +1,6 @@
 ; LOI CATFARM PRO - Inno Setup 6
 #define AppName "LOI CATFARM PRO"
-#define AppVersion "FIX13"
+#define AppVersion "FIX14"
 #define AppExe "LOICatFarmPro.exe"
 
 [Setup]
@@ -26,6 +26,7 @@ Source: "dist\LOICatFarmPro\_internal\*"; DestDir: "{app}\_internal"; Flags: rec
 Source: "dist\LOICatFarmPro\LOICatFarmPro.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "PREPARAR_VLC_PORTATIL.bat"; DestDir: "{app}"; Flags: ignoreversion
 Source: "dist\update_helper.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "dist\spotify_webview_host.exe"; DestDir: "{app}"; Flags: ignoreversion
 
 [Icons]
 Name: "{autoprograms}\LOI CATFARM PRO"; Filename: "{app}\{#AppExe}"; WorkingDir: "{app}"
