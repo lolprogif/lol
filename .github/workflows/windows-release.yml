@@ -82,6 +82,10 @@ jobs:
           $hash = (Get-FileHash LOI_UPDATE.zip -Algorithm SHA256).Hash.ToLower()
           Set-Content LOI_UPDATE.sha256 $hash -NoNewline
           if (!(Test-Path LOI_UPDATE.zip) -or !(Test-Path LOI_UPDATE.sha256)) { throw "Update assets missing" }
+          # Validate ZIP CRC and required files before publishing.
+          python -c "import zipfile; z=zipfile.ZipFile('LOI_UPDATE.zip'); n=set(z.namelist()); assert 'LOICatFarmPro.exe' in n; assert 'spotify_webview_host.exe' in n; assert any(x.startswith('_internal/') for x in n); assert z.testzip() is None"
+          $publishedHash = (Get-Content LOI_UPDATE.sha256 -Raw).Trim()
+          if ($publishedHash -ne $hash) { throw "Update SHA-256 asset does not match package" }
       - name: Publish Release assets
         uses: softprops/action-gh-release@v2
         with:
