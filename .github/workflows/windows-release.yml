@@ -1,0 +1,75 @@
+name: Build Windows installer and updater Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: "Release version (FIX13, FIX14...)"
+        required: true
+        default: "FIX13"
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  build-release:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Validate version and set app version
+        shell: pwsh
+        run: |
+          $tag = "\${{ inputs.release_tag }}"
+          if ($tag -notmatch '^FIX[0-9]+$') { throw "Invalid release tag: $tag" }
+          $source = Get-Content loi_catfarm_pro.py -Raw
+          $source = $source -replace 'UPDATE_CURRENT = ""FIX[0-9]+""', ('UPDATE_CURRENT = ""' + $tag + '""')
+          Set-Content loi_catfarm_pro.py $source -Encoding UTF8
+          $iss = Get-Content LOICatFarmPro.iss -Raw
+          $iss = $iss -replace '#define AppVersion ""FIX[0-9]+""', ('#define AppVersion ""' + $tag + '""')
+          Set-Content LOICatFarmPro.iss $iss -Encoding UTF8
+      - name: Install Python and build dependencies
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - shell: pwsh
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install pyinstaller keyboard pynput pydirectinput pygetwindow pillow opencv-python-headless numpy python-vlc pywebview
+      - name: Compile LOI and updater helper
+        shell: pwsh
+        run: |
+          python -m PyInstaller --noconfirm --clean --onedir --windowed --name LOICatFarmPro --add-data "spotify_webview_host.py;." --add-data "inventory_header_template.png;." --collect-all cv2 --collect-all numpy --collect-all PIL --collect-all keyboard --collect-all pynput --collect-all pydirectinput --collect-all pygetwindow --collect-all vlc --collect-all webview loi_catfarm_pro.py
+          python -m PyInstaller --noconfirm --clean --onefile --windowed --name update_helper update_helper.py
+          if (!(Test-Path "dist/LOICatFarmPro/LOICatFarmPro.exe")) { throw "LOI executable missing" }
+          if (!(Test-Path "dist/update_helper.exe")) { throw "Updater helper missing" }
+      - name: Install Inno Setup
+        shell: pwsh
+        run: choco install innosetup --yes --no-progress
+      - name: Build installer
+        shell: pwsh
+        run: |
+          $iscc = Get-ChildItem "C:/Program Files (x86)/Inno Setup 6/ISCC.exe","C:/Program Files/Inno Setup 6/ISCC.exe" -ErrorAction SilentlyContinue | Select-Object -First 1
+          if (!$iscc) { throw "ISCC not found" }
+          & $iscc.FullName LOICatFarmPro.iss
+          if (!(Test-Path "Output/LOI_CATFARM_PRO_Setup.exe")) { throw "Installer was not created" }
+      - name: Prepare updater ZIP and SHA-256
+        shell: pwsh
+        run: |
+          Compress-Archive -Path "dist/LOICatFarmPro/LOICatFarmPro.exe","dist/LOICatFarmPro/_internal" -DestinationPath LOI_UPDATE.zip -Force
+          $hash = (Get-FileHash LOI_UPDATE.zip -Algorithm SHA256).Hash.ToLower()
+          Set-Content LOI_UPDATE.sha256 $hash -NoNewline
+          if (!(Test-Path LOI_UPDATE.zip) -or !(Test-Path LOI_UPDATE.sha256)) { throw "Update assets missing" }
+      - name: Publish Release assets
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: \${{ inputs.release_tag }}
+          name: LOI CATFARM PRO \${{ inputs.release_tag }}
+          target_commitish: main
+          generate_release_notes: true
+          files: |
+            Output/LOI_CATFARM_PRO_Setup.exe
+            LOI_UPDATE.zip
+            LOI_UPDATE.sha256
+          fail_on_unmatched_files: true
