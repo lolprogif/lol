@@ -416,7 +416,7 @@ class App:
   p=self.pages["Spotify"]
   self.spotify_hwnd=None; self.spotify_process=None
   self.spotify_profile_dir=Path(os.environ.get("LOCALAPPDATA",str(Path.home()))) / "LOI_CATFARM_PRO" / "SpotifyWebView2Profile"
-  self.spotify_helper=Path(__file__).with_name("spotify_webview_host.py")
+  self.spotify_helper=Path(sys.executable).parent / "spotify_webview_host.exe"
   self.section(p,"SPOTIFY — REPRODUÇÃO DENTRO DO LOI CATFARM PRO")
   self.label(p,"Spotify incorporado ao painel usando Microsoft Edge WebView2. Entre na sua própria conta; as regras de reprodução do Spotify continuam valendo.",fg="#e5c45d",wraplength=760,justify="left").pack(anchor="w",padx=14,pady=6)
   bar=self.row(p)
@@ -440,13 +440,11 @@ class App:
   if self.spotify_process and self.spotify_process.poll() is None:
    self.spotify_resize_embedded(); self.spotify_status.config(text="Spotify WebView2 já está iniciado no painel."); return
   if not self.spotify_helper.is_file():
-   self.spotify_status.config(text="Arquivo spotify_webview_host.py não encontrado na pasta do macro."); return
+   self.spotify_status.config(text="Executável spotify_webview_host.exe não encontrado na pasta do LOI."); return
   try:
    self.spotify_profile_dir.mkdir(parents=True,exist_ok=True)
-   pythonw=Path(sys.executable).with_name("pythonw.exe")
-   executable=str(pythonw if pythonw.is_file() else Path(sys.executable))
    flags=getattr(subprocess,"CREATE_NO_WINDOW",0)
-   self.spotify_process=subprocess.Popen([executable,str(self.spotify_helper),str(int(self.spotify_host.winfo_id())),str(self.spotify_profile_dir)],cwd=str(self.spotify_helper.parent),stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL,creationflags=flags)
+   self.spotify_process=subprocess.Popen([str(self.spotify_helper),str(int(self.spotify_host.winfo_id())),str(self.spotify_profile_dir)],cwd=str(self.spotify_helper.parent),stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL,creationflags=flags)
    self.spotify_placeholder.place_forget()
    self.spotify_status.config(text="Iniciando Spotify incorporado com WebView2... aguarde alguns segundos.")
    self.root.after(1800,self.spotify_check_embedded)
@@ -2624,7 +2622,7 @@ class App:
    s=int(time.time()-self.started);self.clock.config(text=f"Tempo: {s//3600:02}:{s//60%60:02}:{s%60:02}")
   self.root.after(500,self.tick)
  UPDATE_REPO = "lolprogif/lol"
- UPDATE_CURRENT = "FIX13"
+ UPDATE_CURRENT = "FIX14"
  UPDATE_PACKAGE_ASSET = "LOI_UPDATE.zip"
  UPDATE_HASH_ASSET = "LOI_UPDATE.sha256"
 
