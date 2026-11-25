@@ -2637,7 +2637,7 @@ class App:
    s=int(time.time()-self.started);self.clock.config(text=f"Tempo: {s//3600:02}:{s//60%60:02}:{s%60:02}")
   self.root.after(500,self.tick)
  UPDATE_REPO = "lolprogif/lol"
- UPDATE_CURRENT = "FIX14"
+ UPDATE_CURRENT = "FIX15"
  UPDATE_PACKAGE_ASSET = "LOI_UPDATE.zip"
  UPDATE_HASH_ASSET = "LOI_UPDATE.sha256"
 
