@@ -1,6 +1,6 @@
 ; LOI CATFARM PRO - Inno Setup 6
 #define AppName "LOI CATFARM PRO"
-#define AppVersion "FIX14"
+#define AppVersion "FIX15"
 #define AppExe "LOICatFarmPro.exe"
 
 [Setup]
