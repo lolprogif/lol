@@ -566,36 +566,51 @@ class App:
  def tv_selected(self):
   sel=self.tv_list.curselection(); return self.tv_visible[sel[0]] if sel and sel[0]<len(self.tv_visible) else None
  def _tv_load_vlc(self):
-  """Carrega primeiro o VLC portátil distribuído junto ao LOI; usa o instalado como reserva."""
-  import os
+  """Localiza e, se necessário, prepara o VLC portátil automaticamente."""
+  import os, subprocess
   from pathlib import Path
   if getattr(self, "_tv_vlc_dir", None) and (self._tv_vlc_dir/"libvlc.dll").is_file():
    vlc_dir=self._tv_vlc_dir
   else:
-   root=Path(__file__).resolve().parent
-   candidates=[root/"VLC_Portable", root/"VLC_Portable"/"vlc-3.0.24", root/"VLC"]
-   # O ZIP oficial contém uma pasta-raiz versionada; procura libvlc.dll sem
-   # depender do nome exato dessa pasta.
-   for folder in (root/"VLC_Portable", root/"VLC"):
-    if folder.is_dir():
-     try: candidates.extend(p.parent for p in folder.rglob("libvlc.dll"))
-     except OSError: pass
-   for envname in ("ProgramFiles", "ProgramFiles(x86)"):
+   # No PyInstaller, __file__ fica dentro de _internal; o VLC e o BAT ficam
+   # na pasta do executável. Procura nos dois locais.
+   roots=[]
+   for candidate in (Path(sys.executable).resolve().parent, Path(__file__).resolve().parent, Path(getattr(sys,"_MEIPASS",Path(__file__).resolve().parent))):
+    if candidate not in roots: roots.append(candidate)
+   candidates=[]
+   for root in roots:
+    candidates.extend([root/"VLC_Portable",root/"VLC_Portable"/"vlc-3.0.24",root/"VLC"])
+    for folder in (root/"VLC_Portable",root/"VLC"):
+     if folder.is_dir():
+      try: candidates.extend(p.parent for p in folder.rglob("libvlc.dll"))
+      except OSError: pass
+   for envname in ("ProgramFiles","ProgramFiles(x86)"):
     base=os.environ.get(envname)
     if base: candidates.append(Path(base)/"VideoLAN"/"VLC")
-   candidates.extend([Path(r"C:\Program Files\VideoLAN\VLC"), Path(r"C:\Program Files (x86)\VideoLAN\VLC")])
-   vlc_dir=next((x for x in candidates if (x/"libvlc.dll").is_file()), None)
+   candidates.extend([Path(r"C:\Program Files\VideoLAN\VLC"),Path(r"C:\Program Files (x86)\VideoLAN\VLC")])
+   vlc_dir=next((x for x in candidates if (x/"libvlc.dll").is_file()),None)
    if vlc_dir is None:
-    raise RuntimeError("O VLC portátil ainda não foi preparado. Feche o macro e execute ABRIR_AQUI.bat com internet para baixar a versão oficial automaticamente.")
+    # Aciona o preparo incluso no instalador e só volta a procurar após terminar.
+    bat=next((root/"PREPARAR_VLC_PORTATIL.bat" for root in roots if (root/"PREPARAR_VLC_PORTATIL.bat").is_file()),None)
+    if bat:
+     self.tv_status.config(text="Status: preparando VLC portátil automaticamente (download inicial)...")
+     try: subprocess.run(["cmd.exe","/c",str(bat)],cwd=str(bat.parent),check=True)
+     except Exception as exc: raise RuntimeError("Não foi possível preparar o VLC automaticamente. Confira a internet e tente novamente. "+str(exc)[:120])
+     for root in roots:
+      for folder in (root/"VLC_Portable",root/"VLC"):
+       if folder.is_dir():
+        try: candidates.extend(p.parent for p in folder.rglob("libvlc.dll"))
+        except OSError: pass
+     vlc_dir=next((x for x in candidates if (x/"libvlc.dll").is_file()),None)
+   if vlc_dir is None:
+    raise RuntimeError("VLC portátil não encontrado. O preparo automático falhou; execute ABRIR_AQUI.bat com internet.")
    self._tv_vlc_dir=vlc_dir
-  # Registra DLLs nativas antes de importar python-vlc.
-  if hasattr(os, "add_dll_directory"):
+  if hasattr(os,"add_dll_directory"):
    try: self._tv_dll_handle=os.add_dll_directory(str(vlc_dir))
    except OSError: pass
   os.environ["PYTHON_VLC_LIB_PATH"]=str(vlc_dir/"libvlc.dll")
   os.environ["PYTHON_VLC_MODULE_PATH"]=str(vlc_dir/"plugins")
   os.environ["VLC_PLUGIN_PATH"]=str(vlc_dir/"plugins")
-  # Algumas dependencias nativas do VLC procuram DLLs na pasta principal.
   os.environ["PATH"]=str(vlc_dir)+os.pathsep+os.environ.get("PATH","")
   import vlc
   return vlc
