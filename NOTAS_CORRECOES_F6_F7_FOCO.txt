@@ -1,0 +1,22 @@
+LOI CATFARM PRO — CORREÇÕES DE CONTROLES E FOCO
+
+Alterações nesta revisão:
+- F7 ficou exclusivo para gravar/parar a rota individual do cliente selecionado.
+- F6 ficou exclusivo para gravar/parar a rota MGP compartilhada.
+- O botão/atalho F7 não inicia mais a gravação MGP quando não há exatamente um cliente selecionado.
+- F6 ativa o primeiro cliente selecionado antes de iniciar a gravação compartilhada.
+- F7 ativa o cliente individual selecionado antes de iniciar a gravação.
+- F8 ativa o primeiro cliente selecionado antes de iniciar o macro normal. Se o Windows não confirmar o foco, o macro não inicia.
+- O botão INICIAR TODOS foi identificado como botão, para não confundir sua ação com o atalho F8 do macro normal.
+- A aba Clientes & Automação passou a ter lista, seleção, organização, escopo e salvar/carregar configuração próprios, sem reutilizar a seleção nem alterar a configuração MGP.
+- Na reprodução sequencial, uma perda de foco interrompe a rota em vez de continuar enviando comandos ao próximo cliente. As teclas e botões mantidos pela rota são liberados no encerramento.
+
+VALIDAÇÃO TÉCNICA REALIZADA:
+- Compilação sintática Python (py_compile).
+- Verificação de integridade do ZIP.
+- Conferência estática dos vínculos F6/F7/F8 e das referências separadas da aba Clientes.
+
+LIMITAÇÃO:
+- Este ambiente não executa Windows/NEWMT2. Portanto, a compilação e a inspeção do código não substituem o teste real no jogo. Teste primeiro com dois clientes e uma rota curta, mantendo a possibilidade de parar pelo F9.
+
+FIX2: TESTAR ROTAS INDIVIDUAIS aceita uma única janela selecionada. A exigência de duas janelas permanece apenas nas funções de alternância de foco e iniciar todos.

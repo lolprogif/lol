@@ -1,0 +1,9 @@
+LOI CATFARM PRO - FIX12
+
+Correcoes desta versao:
+- Perder o foco temporariamente e voltar para o mesmo HWND do NEWMT2 nao encerra mais a reproducao.
+- A pausa por troca de janela nao e tratada como falha definitiva.
+- Ao ligar o macro, Repetir rota continuamente fica ativado para que a gravacao recomece ao terminar cada ciclo.
+- F9/Desligar continua sendo a forma de parar manualmente.
+
+Teste: iniciar a rota gravada, alternar para outra janela, voltar ao mesmo cliente e aguardar o fim da rota. Ela deve continuar repetindo ate F9.

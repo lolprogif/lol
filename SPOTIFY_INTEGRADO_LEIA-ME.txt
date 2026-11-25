@@ -1,0 +1,26 @@
+SPOTIFY INCORPORADO — LOI CATFARM PRO
+
+Esta versão troca a tentativa anterior de encaixar uma janela externa do Edge por um controle de navegador WebView2 hospedado em uma janela auxiliar nativa, que é anexada como janela filha ao painel da aba Spotify.
+
+COMO USAR
+1. Abra o LOI CATFARM PRO com ABRIR_AQUI.bat.
+2. Entre na aba Spotify.
+3. Clique em CONECTAR / ABRIR NO PAINEL.
+4. Aguarde o WebView2 carregar o Spotify dentro do retângulo central da aba.
+5. Faça login na sua própria conta.
+
+REQUISITOS
+- Windows 10/11.
+- Microsoft Edge WebView2 Runtime (Evergreen) instalado. O navegador Edge e o WebView2 Runtime são componentes diferentes; se faltar, instale o runtime oficial da Microsoft.
+- Internet e conta Spotify.
+- O inicializador instala pywebview junto com as dependências Python.
+
+IMPORTANTE
+- O perfil de navegação fica em %LOCALAPPDATA%\LOI_CATFARM_PRO\SpotifyWebView2Profile.
+- O perfil não é incluído no ZIP e não deve ser compartilhado.
+- ABRIR NO NAVEGADOR continua disponível como alternativa externa.
+- RECARREGAR reinicia o controle incorporado; FECHAR PLAYER encerra o processo do player.
+- Esta integração usa WebView2 e uma janela nativa filha para hospedar o controle dentro do painel Tkinter. A reprodução/DRM e o login são controlados pelo Spotify e pelo runtime instalado.
+- Se o runtime não estiver instalado ou o controle não puder ser anexado, consulte spotify_webview_error.txt em %LOCALAPPDATA%\LOI_CATFARM_PRO.
+
+O Spotify é um serviço de terceiros. O LOI CATFARM PRO não fornece conta, assinatura, músicas ou acesso pago.

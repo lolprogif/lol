@@ -1,0 +1,8 @@
+FIX3 - segurança na transição entre clientes
+
+- A reprodução agora tenta confirmar o foco do cliente dono da rota antes de enviar key-up e mouse-up.
+- A limpeza de teclas inclui teclas mantidas pela rota, WASD e teclas configuradas nos módulos.
+- Se não for possível confirmar o foco do cliente anterior e limpar os comandos, a sequência é interrompida e não avança para o próximo cliente.
+- F6/F7 e as gravações individuais/compartilhadas foram mantidos.
+
+IMPORTANTE: compilação e integridade do ZIP foram verificadas. A correção ainda precisa de teste real no NEWMT2, pois eventos de entrada são globais no Windows e o comportamento depende do jogo e do foco real.

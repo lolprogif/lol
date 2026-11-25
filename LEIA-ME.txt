@@ -1,0 +1,113 @@
+LOI CATFARM PRO — MGP MULTICLIENTE (ALTERNÂNCIA AUTOMÁTICA)
+
+A aba "MGP Multicliente" permanece imediatamente ao lado de "Perfis".
+A versão original está preservada em loi_catfarm_pro_original.py.
+
+NOVA FUNÇÃO:
+- Detecta janelas NEWMT2 abertas, sem limite fixo de quatro.
+- Selecione os clientes na lista; "Selecionar todas" inclui todos encontrados.
+- Marque "Enviar ações de teclado para todas as janelas selecionadas".
+- Ajuste "Pausa por janela (s)" (padrão 0,18 s).
+- "TESTAR TROCA DE FOCO" percorre as janelas sem enviar teclas.
+- "INICIAR TODOS (F8)" ativa o macro e alterna o foco para enviar cada ação de teclado,
+  sequencialmente, a cada cliente selecionado.
+- "PAUSAR TODOS (F9)" interrompe a execução.
+- A seleção e as preferências podem ser salvas em um perfil JSON.
+
+COMO TESTAR:
+1. Faça backup da pasta original.
+2. Extraia o ZIP em uma pasta nova.
+3. Execute ABRIR_AQUI.bat.
+4. Abra 2 clientes NEWMT2 e entre com os personagens.
+5. Na aba MGP Multicliente, clique ATUALIZAR JANELAS.
+6. Selecione os dois clientes (ou SELECIONAR TODAS).
+7. Clique TESTAR TROCA DE FOCO: apenas muda o foco, não envia comandos.
+8. Se as janelas alternarem corretamente, marque a opção de alternância automática.
+9. Para um primeiro teste, deixe apenas um módulo de tecla habilitado e teste em local seguro.
+10. Clique INICIAR TODOS (F8).
+
+LIMITAÇÕES:
+- A alternância é sequencial, não simultânea: o Windows só mantém uma janela em foco por vez.
+- O foco muda visivelmente. O Windows/jogo pode bloquear SetForegroundWindow; o programa
+  não tenta contornar esse bloqueio. Se a janela não receber foco, aquela ação é ignorada.
+- A velocidade efetiva depende da quantidade de clientes e do tempo de ativação.
+- Distribui as ações de teclado dos módulos: ataque, câmera, combo e WASD. A montaria automática inicia desativada no modo multicliente para evitar apertar 1 sem querer; pode ser reativada manualmente.
+- Rotas gravadas com cliques/movimentos de mouse não são distribuídas nesta versão.
+  Se houver uma rota gravada, o início multicliente é bloqueado para evitar comandos incorretos.
+- Perfis independentes completos por personagem ainda não foram implementados.
+- F8/F9 e os módulos originais permanecem disponíveis quando a opção MGP está desmarcada.
+- Use conforme as regras do servidor e do jogo. Não há garantia contra punições.
+
+MGP é uma identificação de autoria/projeto, não um registro de patente ou garantia de exclusividade.
+
+
+CORREÇÕES DESTA REVISÃO:
+- Montaria automática vem desativada em instalações novas.
+- Ao iniciar o modo multicliente, se a montaria estiver ligada, ela é desativada
+  nesse início para evitar o envio involuntário da tecla 1.
+- A pausa por janela agora é aplicada depois de ativar a janela e antes de enviar
+  a tecla; o programa confirma novamente que a janela continua em primeiro plano.
+- O campo aceita ponto ou vírgula decimal e intervalos entre 0,05 e 3,00 segundos.
+
+
+NOVA SEÇÃO MGP — ROTA MOUSE + TECLADO:
+- Os botões de gravar/parar reutilizam o gravador original da aba Cliques.
+- "TESTAR ROTA EM TODOS" reproduz a rota inteira em cada janela selecionada,
+  uma janela por vez, ativando o foco antes de cada reprodução.
+- A rota não é enviada em segundo plano nem simultaneamente.
+- Recomenda-se usar janelas com a mesma resolução e a interface do jogo no
+  mesmo layout, pois cliques gravados usam coordenadas relativas à janela.
+- Se a ativação de uma janela falhar, a execução é interrompida para evitar
+  enviar comandos para o cliente incorreto.
+
+ROTAS INDIVIDUAIS POR CLIENTE (MGP MULTICLIENTE)
+1. Atualize as janelas NEWMT2 e selecione APENAS um cliente na lista.
+2. Clique em “GRAVAR ROTA DO SELECIONADO”. A janela selecionada será ativada; grave os movimentos, cliques e teclas normalmente.
+3. Clique em “PARAR E SALVAR ROTA”. A gravação fica associada ao título daquela janela/personagem.
+4. Repita o processo para cada personagem.
+5. Selecione dois ou mais clientes e clique em “TESTAR ROTAS INDIVIDUAIS”. Cada janela executa sua própria rota, uma por vez.
+6. Use “SALVAR CONFIG. MGP” para guardar as rotas individuais no arquivo JSON; “CARREGAR CONFIG. MGP” recupera essas rotas.
+7. “APAGAR ROTA DO SELECIONADO” remove somente a rota individual do cliente selecionado.
+
+Observações: a execução é sequencial e depende de o Windows permitir a troca de foco. Use a mesma resolução e organização de interface nos clientes, principalmente para cliques. Se dois clientes tiverem títulos idênticos, a identificação diferenciada usa o identificador da janela da sessão atual; após reiniciar o jogo, confira e grave novamente as rotas desses clientes duplicados. Faça primeiro um teste curto e seguro antes de deixar a macro executar por longos períodos.
+
+
+AJUSTE MGP MULTICLIENTE
+- Corrigido o fluxo F8 para permitir a execução quando há rotas individuais cadastradas
+  mesmo que a rota compartilhada esteja vazia.
+- A execução continua sequencial: ativa um cliente, reproduz sua rota e passa ao próximo.
+- A trava ClipCursor permanece desativada.
+
+IMPORTANTE SOBRE O MOUSE
+O cursor não fica preso nem limitado à janela do jogo. Porém, a reprodução de movimentos
+gravados usa entrada global do Windows (SendInput/pydirectinput), então os movimentos
+de mouse da macro também podem movimentar o ponteiro físico. Não é possível garantir
+mouse totalmente independente durante movimentos de câmera sem suporte específico do jogo.
+
+CORRECAO MULTICLIENTE - FOCO E TECLAS PRESAS
+A reproducao agora verifica se a janela do cliente continua em primeiro plano antes de enviar cada evento. Se outra janela tomar o foco, a rota e interrompida; a macro tenta devolver o foco ao cliente e libera teclas e botoes para evitar que o personagem continue correndo sozinho. Esta alteracao foi validada por compilacao Python, mas ainda precisa ser testada no Windows com os dois clientes NEWMT2.
+
+
+NOVA ABA POÇÕES (REVISÃO DE INTERFACE)
+- Foi adicionada uma aba independente "Poções", ao lado de MGP Multicliente.
+- Permite cadastrar até quatro poções, ativar/desativar cada uma e guardar coordenadas X/Y.
+- Temporizador padrão configurado para 601 segundos (10:01).
+- As preferências da aba são salvas no perfil JSON e não alteram as configurações MGP.
+- ATENÇÃO: o clique automático ainda não foi ativado nesta revisão. É necessário calibrar coordenadas por janela/cliente e validar a abertura/fechamento do inventário antes de automatizar cliques, para evitar uso de item errado.
+
+
+ABA CORES
+A aba Cores fica ao lado de Poções e altera somente a aparência da interface. Escolha Dark Neon, Dark Red, RGB ou Personalizado. No modo Personalizado, escolha a cor principal e a cor de fundo e use SALVAR APARÊNCIA para manter a escolha na próxima abertura. Essas opções não alteram o funcionamento dos módulos do macro.
+
+
+ATALHO F7 — GRAVAÇÃO
+F7 inicia a gravação e, ao pressionar novamente, encerra e salva a rota. Com exatamente um cliente selecionado na lista MGP, grava a rota individual desse cliente; com nenhum ou vários selecionados, grava a rota MGP compartilhada. O F7 também está disponível nos botões ao lado dos controles de gravação.
+
+
+NOVA ABA — CICLO 4 ETAPAS
+- Atualize as janelas e selecione Cliente 1 e Cliente 2.
+- Grave a etapa 1 e pare/salve; repita para 2, 3 e 4.
+- Etapas 1 e 3 usam Cliente 1; etapas 2 e 4 usam Cliente 2.
+- Inicie o ciclo: ele troca o foco automaticamente após cada etapa.
+- F9 interrompe o ciclo; é possível salvar/carregar a configuração em JSON.
+- A reprodução usa janelas visíveis e entradas comuns; não contorna anti-cheat.

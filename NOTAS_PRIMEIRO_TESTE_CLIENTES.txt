@@ -1,0 +1,35 @@
+LOI CATFARM PRO — PRIMEIRO TESTE CLIENTES & AUTOMACAO
+
+BASE: LOI_CATFARM_PRO_POCOES_RECONHECIMENTO_AUTOMATICO
+
+NOVIDADES DESTA VERSAO
+- Nova aba "Clientes & Automacao", ao lado de Cores.
+- Modos visiveis: Automatico, Macro central e Macros separados (manual/experimental).
+- A aba nova reutiliza a lista de janelas, selecao, posicionamento e configuracao do MGP existente.
+- Botao para testar o foco de uma janela selecionada individualmente; o teste informa o HWND e nao envia teclas do jogo.
+- Preferencia de modo de operacao salva/carregada junto da configuracao MGP.
+- Posicionamento Sobrepostas continua alinhando as janelas selecionadas em (0,0). Independentes significa nao mover as janelas.
+- Escopo Geral/Individual compartilha os seletores com a aba MGP existente. Rotas individuais ja sao armazenadas por cliente.
+
+LIMITACOES IMPORTANTES DESTE PRIMEIRO TESTE
+- Automatico e um atalho seguro para o fluxo de macro central; nao inicia copias extras do programa.
+- Macros separados ainda e um fluxo manual/experimental. O vinculo IPC/controle exclusivo de cada instancia nao foi implementado.
+- Nao ha comandos fisicos simultaneos para varias janelas: mouse/teclado normalmente atuam na janela em foco. A alternancia e sequencial.
+- A opcao Individual por cliente ainda precisa de validacao/implementacao completa para todos os parametros dos modulos; nao confundir com as rotas individuais, que ja tem armazenamento separado.
+- A identificacao e por janela/HWND, nao por nome do personagem dentro do jogo.
+- O teste de foco depende das permissoes do Windows e do jogo.
+
+COMO TESTAR
+1. Extraia em uma pasta separada. Nao apague nem sobrescreva a versao anterior.
+2. Abra pelo ABRIR_AQUI.bat.
+3. Abra dois ou mais clientes NEWMT2.
+4. Na aba MGP Multicliente, clique em ATUALIZAR JANELAS e selecione uma janela.
+5. Na aba Clientes & Automacao, clique em TESTAR JANELA SELECIONADA. Veja se o foco vai para a janela correta.
+6. Teste Sobrepostas apenas se quiser mover as janelas selecionadas para (0,0). Independentes nao move as janelas.
+7. Para testar rotas e alternancia, use primeiro a aba MGP Multicliente e mantenha os clientes selecionados.
+8. Teste F8/F9/F11 e as poções separadamente, sem executar Poções junto com gravação/rota/MGP.
+
+VALIDACAO REALIZADA NA PREPARACAO
+- Compilacao Python (py_compile).
+- Integridade do arquivo ZIP.
+- Nao foi possivel validar comportamento dentro do NEWMT2 nesta etapa.

@@ -1,0 +1,39 @@
+LOI CATFARM PRO — PACOTE PARA GERAR O INSTALADOR WINDOWS
+Versão-base: FIX12 — preparação com aba Módulos + Jogo e sistema de atualização inicial.
+
+IMPORTANTE
+Este pacote prepara a compilação e o Setup.exe no seu Windows. O Setup.exe ainda
+não foi compilado aqui porque a geração de executáveis Windows precisa ser feita
+em ambiente Windows com PyInstaller e Inno Setup.
+
+REQUISITOS
+- Windows 10/11 64 bits
+- Python 3.11 ou 3.12 64 bits instalado (marque Add Python to PATH)
+- Inno Setup 6: o gerador verifica e instala automaticamente se estiver ausente (internet e autorizacao UAC podem ser solicitadas).
+- Internet na primeira preparação (dependências Python e VLC portátil)
+
+COMO GERAR
+1. Extraia toda a pasta para um local simples, por exemplo C:\LOI_CATFARM_PRO.
+2. Instale Python 3.11/3.12 64 bits. O Inno Setup 6 sera verificado/instalado automaticamente pelo gerador.
+3. Feche o macro e execute GERAR_INSTALADOR.bat. Se o Windows solicitar autorizacao (UAC) para instalar Inno Setup, confirme.
+4. Aguarde a instalação das bibliotecas e a compilação.
+5. Ao terminar, procure Output\LOI_CATFARM_PRO_Setup.exe. O pacote também compila update_helper.exe, usado pelo atualizador.
+6. Execute o Setup.exe para instalar. Depois, no menu Iniciar, abra “Preparar VLC portátil” uma vez para baixar e validar o VLC (aprox. 83 MB). O programa ficará no perfil do usuário
+   (AppData\Local\Programs), sem exigir instalação em Program Files.
+
+OBSERVAÇÕES IMPORTANTES
+- A compilação usa modo onedir para manter os arquivos auxiliares juntos.
+- Configurações e gravações são criadas pelo próprio macro. Antes de instalar,
+  faça cópia de segurança dos perfis/rotas JSON que já existam na pasta da FIX12.
+- O VLC portátil é baixado e validado pelo PREPARAR_VLC_PORTATIL.bat na primeira
+  preparação. A pasta será colocada dentro de _internal para o player encontrá-la.
+- O primeiro pacote não inclui o VLC de 83 MB; ele é baixado da VideoLAN oficial.
+- O Spotify incorporado depende do Microsoft Edge WebView2 Runtime no Windows.
+- Se o macro precisar controlar um jogo executado como administrador, execute o
+  LOI CATFARM PRO também como administrador.
+- A FIX12 original permanece preservada; este pacote não substitui nem modifica
+  a sua cópia original.
+
+Se a compilação apresentar erro, envie uma foto da janela ou o texto completo.
+
+Consulte ATUALIZADOR_LEIA-ME.txt para as condições de uso do botão VERIFICAR / ATUALIZAR e publicação de Releases.

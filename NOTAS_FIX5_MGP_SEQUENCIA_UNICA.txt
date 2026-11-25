@@ -1,0 +1,14 @@
+FIX5 — MGP: SEQUÊNCIA ÚNICA E LIMPEZA DE COMANDOS
+
+Base: FIX4_GRAVACAO_FOCO_EXATO enviada pelo usuário.
+
+Alterações:
+- INICIAR TODOS não marca mais silenciosamente a caixa “Habilitar alternância”.
+- Quando a sequência MGP de rotas é executada, o ciclo é encerrado após uma passagem pelos clientes selecionados, independentemente da opção de repetição da aba Cliques.
+- Ao concluir, o macro sinaliza parada, limpa teclas/botões globais e encerra o estado de transmissão MGP para impedir novo ciclo automático.
+- Demais arquivos e funções da FIX4 foram preservados.
+
+VALIDAÇÃO:
+- loi_catfarm_pro.py passou em py_compile (sem erros de sintaxe).
+- ZIP criado e testado quanto à integridade.
+- Não foi possível testar a execução real no Windows/NEWMT2 neste ambiente. É necessário validar com duas janelas abertas.

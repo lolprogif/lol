@@ -1,0 +1,18 @@
+LOI CATFARM PRO — VLC PORTÁTIL (CORREÇÃO DO DOWNLOAD)
+
+O inicializador baixa o pacote ZIP oficial VLC 3.0.24 x64 do VideoLAN (aprox. 83 MB), valida tamanho e SHA-256 e só informa sucesso se encontrar libvlc.dll após extrair. O download é feito uma vez por pasta do programa. Não instala VLC no Windows.
+
+COMO TESTAR
+1. Feche o LOI CATFARM PRO.
+2. Extraia esta versão em uma pasta nova.
+3. Execute ABRIR_AQUI.bat com internet.
+4. Aguarde a mensagem “VLC portátil pronto e conferido”.
+5. Abra a aba TV e teste um canal.
+
+Se o download falhar, o script agora para e informa erro; não exibirá falso “VLC pronto”. Não desinstale o VLC instalado no Windows até confirmar a reprodução usando a pasta VLC_Portable.
+
+VALIDAÇÃO DESTA ENTREGA
+- Corrigido o inicializador PREPARAR_VLC_PORTATIL.bat.
+- ZIP de saída testado quanto à integridade.
+- Código Python principal preservado; compilação sintática verificada.
+- O download e a reprodução real precisam ser confirmados no Windows do usuário.

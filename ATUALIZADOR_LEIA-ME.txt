@@ -1,0 +1,33 @@
+LOI CATFARM PRO — MÓDULOS + JOGO E VERIFICAR/ATUALIZAR
+
+ALTERAÇÕES DESTA PREPARAÇÃO
+- As abas Módulos e Jogo foram reunidas em uma única aba: "Módulos + Jogo".
+  O conteúdo de ambas foi mantido e os builders originais continuam usando a mesma página.
+- Foi acrescentado o botão "VERIFICAR / ATUALIZAR" no rodapé.
+- A verificação consulta Releases do GitHub no repositório lolprogif/lol.
+- O atualizador exige uma Release com dois assets: LOI_UPDATE.zip e LOI_UPDATE.sha256.
+- O hash SHA-256 é verificado antes de iniciar qualquer substituição.
+- Um helper separado espera o programa encerrar, cria backup local e atualiza apenas
+  LOICatFarmPro.exe e _internal, mantendo arquivos JSON de configuração existentes.
+- Se a substituição falhar, o helper tenta restaurar os componentes anteriores.
+
+
+PRIMEIRA INSTALAÇÃO / LIMITAÇÕES
+- O botão de atualização do LOI antigo NÃO foi retroativamente conectado.
+- É necessário gerar e instalar esta nova compilação uma vez.
+- O instalador Windows não foi compilado/testado nesta sessão (ambiente não Windows).
+- O repositório lolprogif/lol precisa ter uma Release publicada com os assets acima;
+  no momento da implementação não foi configurada/publicada uma Release.
+- O sistema de atualização é uma base implementada e ainda requer teste real no Windows.
+
+
+COMO PUBLICAR UMA RELEASE DE ATUALIZAÇÃO (para cada versão futura)
+1. Compile o LOI pelo GERAR_INSTALADOR.bat, de modo que dist\LOICatFarmPro contenha
+   LOICatFarmPro.exe e _internal.
+2. Crie LOI_UPDATE.zip contendo na raiz do ZIP somente LOICatFarmPro.exe e a pasta
+   _internal (com seus arquivos). Não inclua configurações locais nem update_helper.exe.
+3. Calcule SHA-256 do LOI_UPDATE.zip e salve o valor hexadecimal em LOI_UPDATE.sha256.
+4. Publique ambos os arquivos como assets de uma Release no GitHub lolprogif/lol.
+5. Use uma tag de versão diferente de FIX12, por exemplo FIX13.
+
+TXT de hash deve conter apenas o hash (ou hash seguido do nome do ZIP).

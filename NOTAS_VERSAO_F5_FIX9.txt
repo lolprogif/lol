@@ -1,0 +1,3 @@
+
+
+ABA TV adicionada nesta revisão: cadastro de servidores Xtream/M3U/Stalker/lista local, carregamento M3U e API Xtream, lista de canais, player VLC integrado opcional e tela cheia com ESC. Consulte TV_LEIA-ME.txt.

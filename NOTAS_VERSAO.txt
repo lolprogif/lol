@@ -1,0 +1,40 @@
+CORREÇÃO — MGP MULTICLIENTE INDEPENDENTE
+
+- F8/F9 iniciam e pausam o macro normal sem depender de 1, 2 ou 10 janelas.
+- A aba Cliques (gravação, teste e reprodução) permanece independente do MGP.
+- Marcar a opção de alternância não ativa o MGP automaticamente ao pressionar F8.
+- A alternância de clientes só é iniciada pelo botão dedicado INICIAR TODOS.
+- TESTAR ROTAS INDIVIDUAIS continua sendo uma ação exclusiva do MGP.
+
+Teste no jogo: primeiro com uma janela, depois com várias. Confirme que F8/F9
+controlam apenas o macro normal e que INICIAR TODOS é usado quando quiser
+alternar entre os clientes.
+
+
+NOVA ABA CORES (visual בלבד): adicionada após Poções. Temas Dark Neon, Dark Red, RGB e Personalizado. Permite escolher cor principal e fundo, salvar/restaurar aparência em loi_appearance.json. A personalização altera somente cores/estilos da interface e não modifica rotinas, teclas, gravações, ataques, poções ou Multicliente.
+
+
+ABA CORES — GALERIA COM 24 TEMAS
+Mantidos Dark Neon, Dark Red, RGB e Personalizado; adicionados Cyberpunk Neon, RGB Gaming, Holográfico, Minimalista, Glassmorphism, Neumorphism, Militar Tático, Premium Dourado, Synthwave, Matrix, Blue Electric, Clean Light, Industrial, Galaxy, Anime Gamer, Transparente, Flat Design, Pixel Retro, Futurista Premium e Ocean Neon. A alteração é somente visual.
+
+
+AJUSTE DE POÇÕES — TEMPO DE ABERTURA DO INVENTÁRIO
+- Adicionada uma única opção editável logo após TESTAR, LIGAR e DESLIGAR.
+- Valor inicial: 0,15 segundo.
+- Aceita ponto ou vírgula decimal; intervalo permitido de 0 a 30 segundos.
+- Afeta exclusivamente a espera após pressionar I para abrir o inventário,
+  antes dos cliques nas poções.
+- O valor é incluído no perfil JSON existente.
+- Intervalos entre poções e fechamento do inventário permanecem inalterados.
+
+
+RECONHECIMENTO AUTOMÁTICO DO INVENTÁRIO
+- A pergunta Sim/Não foi removida.
+- O programa procura visualmente o cabeçalho do inventário do NEWMT2 na tela.
+- Se reconhecer o inventário aberto, usa as poções e não fecha o inventário.
+- Se não reconhecer, aperta I para abrir, usa as poções e fecha ao terminar.
+- A detecção é refeita a cada ciclo de renovação.
+- Requer Pillow, OpenCV e NumPy; ABRIR_AQUI.bat instala essas dependências.
+- O reconhecimento usa o modelo visual incluído no ZIP e pode precisar de ajuste se o tema/interface do jogo mudar.
+
+FIX10: ao perder o foco do Metin2, mantém o macro ligado e pausa o envio de teclas; a reprodução aguarda o retorno ao mesmo HWND e congela o relógio da rota para continuar do ponto interrompido.

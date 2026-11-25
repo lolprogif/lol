@@ -1,0 +1,37 @@
+ABA TV — LOI CATFARM PRO
+
+- Cadastre conexoes próprias: Xtream Codes, M3U/URL, Stalker Portal e lista local.
+- Xtream Codes: informe a URL base do servidor, usuário e senha; o programa consulta categorias, canais ao vivo, filmes e séries disponibilizados pela API.
+- M3U/URL: informe a URL e clique em CONECTAR / BUSCAR CANAIS.
+- Lista local: selecione um arquivo .m3u ou .m3u8.
+- Stalker Portal: os campos URL, MAC e token ficam disponíveis para cadastro; a importação automática de canais ainda depende dos detalhes/API específicos do portal.
+- Os servidores cadastrados são salvos em loi_catfarm_tv.json na pasta do programa. Esse arquivo contém credenciais em texto simples; mantenha-o privado e não compartilhe.
+- O player usa primeiro o VLC portátil em VLC_Portable (preparado por ABRIR_AQUI.bat); não exige instalar VLC no Windows. O VLC instalado no Windows fica apenas como alternativa.
+- Tela cheia do player: botão TELA CHEIA; ESC ou F11 retorna ao macro. A janela de tela cheia não usa overrideredirect.
+- A reprodução depende de URLs e assinaturas autorizadas, formatos suportados e disponibilidade do servidor. Não há canais pagos ou credenciais pré-carregados.
+
+NOVIDADES — REVISÃO SPOTIFY + PICTURE-IN-PICTURE
+- Nova aba Spotify com atalhos oficiais para abrir o Spotify Web ou o aplicativo instalado.
+- O login é feito diretamente no Spotify. Nesta primeira revisão, o Spotify abre no navegador/aplicativo externo; ainda não está incorporado dentro do painel do macro.
+- Na aba TV, o botão PIP abre uma janela flutuante sempre visível, que pode ser movida e redimensionada.
+- O botão VOLTAR AO MACRO ou a tecla ESC devolve o vídeo ao player da aba TV.
+- O botão PIP funciona como alternância: abre a janela flutuante ou devolve o vídeo ao macro.
+- A janela PIP e a tela cheia usam a mesma reprodução VLC, sem criar uma segunda transmissão.
+- A reprodução integrada usa a biblioteca python-vlc e o VLC portátil 64-bit.
+- Esta revisão foi validada por compilação Python; PIP e reprodução precisam de teste prático no Windows com o VLC instalado.
+
+
+VLC PORTATIL — ESTA REVISAO
+- O inicializador baixa automaticamente o ZIP oficial VLC 3.0.24 para Windows 64-bit e extrai em VLC_Portable na primeira execucao.
+- Nao instala o VLC no Windows, nao altera o registro e nao exige desinstalar uma versao existente.
+- O LOI procura primeiro o VLC portatil dentro da pasta do programa; se nao estiver disponivel, usa a instalacao normal como alternativa.
+- O download exige internet apenas na primeira preparacao; depois o VLC fica junto da pasta do LOI.
+- O pacote redistribuido e obtido diretamente do VideoLAN; mantenha os avisos/licencas incluidos no pacote oficial.
+- Se o download automatico falhar, tente executar PREPARAR_VLC_PORTATIL.bat novamente.
+
+
+DIAGNOSTICO DE REPRODUCAO — REVISAO
+- O status da aba TV agora acompanha eventos reais do VLC (abrindo, buffer, reproduzindo, erro e fim do fluxo).
+- O macro nao informa mais “Reproduzindo” imediatamente apenas porque chamou play().
+- Foi reforcado o caminho das DLLs e dos plugins do VLC portatil, cache de rede e volume inicial.
+- Se um canal nao abrir, o status ajuda a distinguir falha do player de indisponibilidade/URL/formato do fluxo.

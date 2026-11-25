@@ -1,0 +1,11 @@
+CORREÇÃO DA ABA CICLO 4 ETAPAS — IDENTIFICAÇÃO DE JANELAS
+
+- A aba Ciclo 4 agora enumera as janelas NEWMT2 diretamente e cria uma opção por HWND único.
+- Os campos Cliente 1 e Cliente 2 exibem o HWND real, evitando confusão quando os títulos das janelas são iguais.
+- A seleção dos clientes na lista da aba MGP não é requisito para gravar o Ciclo 4.
+- A gravação verifica se Cliente 1 e Cliente 2 são duas janelas distintas antes de começar.
+- O status de gravação mostra o HWND de destino para facilitar a conferência.
+- A configuração salva também os HWNDs; ao carregar, tenta reencontrar as janelas pelos identificadores atuais.
+
+LIMITAÇÃO DO TESTE
+O código foi validado quanto à sintaxe Python e à lógica estática. Não foi possível executar o NEWMT2 neste ambiente. A troca de foco depende da permissão normal do Windows e da resposta do jogo; não há bypass de anti-cheat nem execução oculta/em segundo plano.

@@ -1,0 +1,15 @@
+CORREÇÃO DE GRAVAÇÃO — FOCO EXATO DO CLIENTE
+
+- F7 (rota individual) fica vinculada ao HWND exato da janela selecionada na lista MGP.
+- F6 (rota compartilhada) fica vinculada ao primeiro cliente selecionado durante a gravação.
+- A gravação fica aguardando até a janela NEWMT2 vinculada receber o foco. O cronômetro e os capturadores só começam nesse momento.
+- Cliques só são registrados quando o cursor está dentro da área da janela vinculada e ela é a janela em primeiro plano.
+- Cliques na interface LOI CATFARM PRO, em outros programas ou em outra janela NEWMT2 são ignorados.
+- Teclas novas só são registradas com o HWND vinculado em primeiro plano. Solturas de teclas/botão já registrados são preservadas para evitar comandos presos na reprodução.
+- A captura Raw Input da câmera também exige o foco do HWND vinculado.
+- Ao parar, se o botão direito ainda estiver registrado como pressionado, é acrescentado o evento de soltura.
+
+VALIDAÇÃO
+- Arquivo Python compilado com py_compile sem erros de sintaxe.
+- ZIP íntegro após empacotamento.
+- Ainda precisa de teste real no Windows/NEWMT2 para confirmar o comportamento do foco, cliques e câmera.
