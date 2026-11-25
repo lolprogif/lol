@@ -10,6 +10,7 @@ import zipfile
 from pathlib import Path
 
 APP_EXE = "LOICatFarmPro.exe"
+SPOTIFY_HELPER_EXE = "spotify_webview_host.exe"
 
 
 def wait_for_pid(pid: int, timeout_ms: int = 120000):
@@ -55,7 +56,7 @@ def safe_member(name: str) -> bool:
         return False
     if is_dir:
         return normalized == "_internal" or normalized.startswith("_internal/")
-    return normalized == APP_EXE or normalized.startswith("_internal/")
+    return normalized in (APP_EXE, SPOTIFY_HELPER_EXE) or normalized.startswith("_internal/")
 
 def main():
     if len(sys.argv) < 5:
@@ -90,8 +91,8 @@ def main():
                 if (member.external_attr >> 16) & 0o170000 == 0o120000:
                     raise RuntimeError("Pacote contém link simbólico; atualização bloqueada.")
             z.extractall(stage)
-        if not (stage / APP_EXE).is_file() or not (stage / "_internal").is_dir():
-            raise RuntimeError("Pacote de atualização incompleto: executável ou _internal ausente.")
+        if not (stage / APP_EXE).is_file() or not (stage / "_internal").is_dir() or not (stage / SPOTIFY_HELPER_EXE).is_file():
+            raise RuntimeError("Pacote de atualização incompleto: executável, _internal ou helper Spotify ausente.")
         # Preserve locally stored JSON preferences in the PyInstaller internal folder.
         old_internal = install / "_internal"
         if old_internal.is_dir():
@@ -100,11 +101,11 @@ def main():
                 if config.is_file() and not target_config.exists():
                     shutil.copy2(config, target_config)
         # Prepare backups of the two app components, leaving all user data untouched.
-        for item in (APP_EXE, "_internal"):
+        for item in (APP_EXE, "_internal", SPOTIFY_HELPER_EXE):
             target = install / item
             if target.exists():
                 shutil.copytree(target, backup / item) if target.is_dir() else shutil.copy2(target, backup / item)
-        for item in ("_internal", APP_EXE):
+        for item in ("_internal", APP_EXE, SPOTIFY_HELPER_EXE):
             source, target = stage / item, install / item
             # Register before replacing so a partially failed copy is also rolled back.
             changed.append(item)
